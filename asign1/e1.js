@@ -40,17 +40,20 @@ function main() {
         let ok1 = 0;
         for (let i = 0; i < 500; i++) {
             if ((arr[i].posX < 0 || arr[i].posY < 0) && ok == 0 && mouseX > 0 && mouseY > 0) {
-                console.log('a');
+                //console.log('a');
                 arr[i].posX = mouseX;
                 arr[i].posY = mouseY;
-                arr[i].div.style.left = mouseX + 'px';
-                arr[i].div.style.top = mouseY + 'px';
+                let val = doHarmonic(arr[i]);
+                // arr[i].div.style.left = mouseX + 'px';
+                // arr[i].div.style.top = mouseY + 'px';
+                arr[i].div.style.transform = `translate3d(${arr[i].posX + val}px,${arr[i].posY - 3}px,0px)`;
                 document.getElementsByTagName('body')[0].appendChild(arr[i].div);
                 ok = 1;
             } else {
-                arr[i].div.style.top = (arr[i].posY - 3) + 'px';
+                //arr[i].div.style.top = (arr[i].posY - 3) + 'px';
                 let val = doHarmonic(arr[i]);
-                arr[i].div.style.left = (arr[i].posX + val) + 'px';
+                arr[i].div.style.transform = `translate3d(${arr[i].posX + val}px,${arr[i].posY - 3}px,0px)`;
+                //arr[i].div.style.left = (arr[i].posX + val) + 'px';
                 arr[i].cont += (Math.random()/5);
                 arr[i].posY -= 3;
                 arr[i].posX = arr[i].posX + val;
@@ -91,7 +94,7 @@ function main() {
     document.addEventListener('mouseleave', function (e) {
         posX = -1;
         posY = -1;
-        console.log('left');
+        //console.log('left');
     });
     function getMp() {
         doStuffsWithBubbles(posX, posY);
