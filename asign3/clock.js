@@ -79,8 +79,8 @@ function Clock(){
                 el.innerHTML = (i).toString();
             }
             el.style.fontSize = '40px';
-            el.style.top = (r + y + 5) + 'px';
-            el.style.left = (r + x + 5) + 'px';
+            el.style.top = (r + y + 14) + 'px';
+            el.style.left = (r + x + 14) + 'px';
             degr += 30;
         }
     }
