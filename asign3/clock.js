@@ -19,39 +19,39 @@ function Clock(){
     }
     function draw_arrows(clock_shape){
         let middle = document.createElement('div');
-        middle.style.width = '40px';
-        middle.style.height = '40px';
+        middle.style.width = '50px';
+        middle.style.height = '50px';
         middle.style.borderRadius = '50%';
         middle.style.border = '2px solid black';
         middle.style.position = 'absolute';
         clock_shape.append(middle);
         let val = parseInt(clock_shape.style.width.slice(0,clock_shape.style.width.indexOf('p')));
-        middle.style.top = (val/2 - 35) + 'px';
-        middle.style.left = (val/2 - 15) + 'px';
+        middle.style.top = (val/2 - 15) + 'px';
+        middle.style.left = (val/2) + 'px';
         middle.style.backgroundColor = 'black';
         let secundar = document.createElement('div');
         secundar.style.width = '6px';
-        secundar.style.height = (val/2) + 'px';
+        secundar.style.height = (val/2 + 5) + 'px';
         secundar.style.position = 'absolute';
         secundar.style.backgroundColor = 'black';
-        secundar.style.top = (val/4) + 'px';
-        secundar.style.left = (val/2 + 4) + 'px';
+        secundar.style.top = (val/2 - 370) + 'px';
+        secundar.style.left = (val/2 + 15) + 'px';
         clock_shape.append(secundar);
         let minutar = document.createElement('div');
         minutar.style.width = '8px';
-        minutar.style.height = (val/2 - 30) + 'px';
+        minutar.style.height = (val/2 - 20) + 'px';
         minutar.style.position = 'absolute';
         minutar.style.backgroundColor = 'black';
-        minutar.style.top = (val/4) + 'px';
-        minutar.style.left = (val/2 + 3) + 'px';
+        minutar.style.top = (val/2 - 350) + 'px';
+        minutar.style.left = (val/2 + 15) + 'px';
         clock_shape.append(minutar);
         let orar = document.createElement('div');
         orar.style.width = '10px';
-        orar.style.height = (val/2 - 60) + 'px';
+        orar.style.height = (val/2 - 40) + 'px';
         orar.style.position = 'absolute';
         orar.style.backgroundColor = 'black';
-        orar.style.top = (val/4) + 'px';
-        orar.style.left = (val/2 + 2) + 'px';
+        orar.style.top = (val/2 - 315) + 'px';
+        orar.style.left = (val/2 + 5) + 'px';
         clock_shape.append(orar);
         return [middle,secundar,minutar,orar];
     }
@@ -97,16 +97,23 @@ function Clock(){
         hands.long += 6;
         hands.medium += 0.1;
         hands.short += (360/(3600 * 12));
-        secundar.style.webkitTransform = 'rotate(' + hands.long + 'deg)';
-        minutar.style.webkitTransform = 'rotate(' + hands.medium + 'deg)';
+        secundar.style.transformOrigin = '6px 380px';
+        secundar.style.transform = 'rotate(' + hands.long +'deg)';
+        minutar.style.transformOrigin = '8px 355px';
+        minutar.style.transform = 'rotate(' + hands.medium + 'deg)';
+        orar.style.transformOrigin = '10px 335px';
+        orar.style.transform = 'rotate(' + hands.short + 'deg)';
     };
     this.initialize = function(seconds,minutes,hours){
         hands.long = seconds * 6;
         hands.medium = (0.1 * ((minutes*60 + seconds)));
         hands.short = ((360/(3600*12))*(hours*3600 + minutes*60 + seconds));
-        secundar.style.webkitTransform = 'rotate(' + seconds * 6 + 'deg)';
-        minutar.style.webkitTransform = 'rotate(' + (0.1 * ((minutes*60 + seconds))) + 'deg)';
-        orar.style.webkitTransform = 'rotate(' + ((360/(3600*12)) * (hours*3600 + minutes*60 + seconds)) + 'deg)';
+        secundar.style.transformOrigin = '6px 380px';
+        secundar.style.transform = 'rotate(' + seconds * 6 + 'deg)';
+        minutar.style.transformOrigin = '8px 355px';
+        minutar.style.transform = 'rotate(' + (0.1 * ((minutes*60 + seconds))) + 'deg)';
+        orar.style.transformOrigin = '10px 335px';
+        orar.style.transform = 'rotate(' + ((360/(3600*12)) * (hours*3600 + minutes*60 + seconds)) + 'deg)';
     }
 }
 let date = new Date();
