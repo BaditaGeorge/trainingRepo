@@ -1,4 +1,4 @@
-let list_Of_positions = [{x:15,y:15,t:'s',l:50},{x:37,y:55,t:'s',l:48},{x:450,y:380,t:'c',l:35},{x:183,y:200,t:'s',l:43}]
+let list_Of_positions = [{x:15,y:15,t:'s',l:50},{x:37,y:55,t:'s',l:48},{x:450,y:380,t:'c',l:35},{x:140,y:200,t:'s',l:50},{x:183,y:200,t:'s',l:43}]
 
 function draw_Shapes(){
     for(let elem of list_Of_positions){
@@ -49,7 +49,7 @@ function check_square_overlaping(){
                         if(el1.x > el2.x && el2.x + el2.l >= el1.x){
                             console.log(i,j,'Suprapunere');
                         }else if(el1.x < el2.x && el1.x + el1.l >= el2.x){
-                            console.log('Suprapunere');
+                            console.log(i,j,'Suprapunere');
                         }
                     }
                 }
