@@ -28,36 +28,8 @@ function check_square_overlaping(){
         if(el1.t === 's'){
             for(let j=i+1; j<list_Of_positions.length; j++){
                 let el2 = list_Of_positions[j];
-                if(el2.t === 's'){
-                    if(el1.x > el2.x && el1.y > el2.y){
-                        if(el2.x + el2.l >= el1.x || el2.y + el2.l >= el1.y){
-                            log_and_paint(el1,el2);
-                        }
-                    }else if(el1.x < el2.x && el1.y < el2.y){
-                        if(el1.x + el1.l >= el2.x || el1.y + el1.l >= el2.y){
-                            log_and_paint(el1,el2);
-                        }
-                    }else if(el1.x < el2.x && el1.y > el2.y){
-                        if(el1.x + el1.l >= el2.x && el2.y + el2.l >= el1.y){
-                            log_and_paint(el1,el2);
-                        }
-                    }else if(el1.x > el2.x && el1.y < el2.y){
-                        if(el2.x + el2.l >= el1.x && el1.y + el1.l >= el2.y){
-                            log_and_paint(el1,el2);
-                        } 
-                    }else if(el1.x === el2.x){
-                        if(el1.y > el2.y && el2.y + el2.l >= el1.y){
-                            log_and_paint(el1,el2);
-                        }else if(el1.y < el2.y && el1.y + el1.l >= el2.y){
-                            log_and_paint(el1,el2);
-                        }
-                    }else if(el1.y === el2.y){
-                        if(el1.x > el2.x && el2.x + el2.l >= el1.x){
-                            log_and_paint(el1,el2);
-                        }else if(el1.x < el2.x && el1.x + el1.l >= el2.x){
-                            log_and_paint(el1,el2);
-                        }
-                    }
+                if(!(el1.x + el1.l < el2.x || el1.y + el1.l < el2.y || el2.x + el2.l < el1.x || el2.y + el2.l < el1.y)){
+                    log_and_paint(el1,el2);
                 }
             }
         }
