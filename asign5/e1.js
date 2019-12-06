@@ -19,7 +19,7 @@ function draw_Shapes(){
 
 function log_and_paint(el1,el2){
     console.log(el1.x,el1.y,el2.x,el2.y,'Suprapunere');
-    el1.ref.style.backgroundColor = 'yellow'
+    el1.ref.style.backgroundColor = 'yellow';
 }
 
 function check_square_overlaping(){
