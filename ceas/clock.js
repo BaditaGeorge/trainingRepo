@@ -2,7 +2,8 @@ function Clock(){
     let page_body = document.getElementsByTagName('body')[0];
     page_body.style.width = window.innerWidth + 'px';
     page_body.style.height = window.innerHeight + 'px';
-    let middle,secundar,minutar,orar;
+    const angle_between_numbers = 30;
+    let secundar,minutar,orar;
     let hands = {
         small:0,
         medium:0,
@@ -55,9 +56,7 @@ function Clock(){
         clock_shape.append(orar);
         return [middle,secundar,minutar,orar];
     }
-    document.addEventListener('click',(e)=>{
-        console.log(e.clientX,e.clientY);
-    });
+    
     function draw_numbers(clock_shape){
         let r = parseInt(clock_shape.style.width.slice(0,clock_shape.style.width.indexOf('p')));
         r = r/2;
@@ -73,22 +72,24 @@ function Clock(){
             el.style.position = 'absolute';
             el.style.borderRadius = '50%';
             if(i==0){
-                el.innerHTML = (12).toString();
+                el.innerHTML = 12;
             }
             else{
-                el.innerHTML = (i).toString();
+                el.innerHTML = i;
             }
             el.style.fontSize = '40px';
             el.style.top = (r + y + 14) + 'px';
             el.style.left = (r + x + 14) + 'px';
-            degr += 30;
+            degr += angle_between_numbers;
         }
     }
-    this.execute = function(){
+
+    function execute(){
         let clock_shape = create_Shape();
         [middle,secundar,minutar,orar] = draw_arrows(clock_shape);
         draw_numbers(clock_shape);
-    }
+    };
+
     this.moveSecundar = function(){
         hands.long += 6;
         hands.medium += 0.1;
@@ -100,7 +101,9 @@ function Clock(){
         orar.style.transformOrigin = '10px 335px';
         orar.style.transform = 'rotate(' + hands.short + 'deg)';
     };
+
     this.initialize = function(seconds,minutes,hours){
+        execute();
         hands.long = seconds * 6;
         hands.medium = (0.1 * ((minutes*60 + seconds)));
         hands.short = ((360/(3600*12))*(hours*3600 + minutes*60 + seconds));
@@ -114,7 +117,6 @@ function Clock(){
 }
 let date = new Date();
 let clock_object = new Clock();
-clock_object.execute();
 clock_object.initialize(date.getSeconds(),date.getMinutes(),date.getHours());
 function recCall(){
     setTimeout(function(){
