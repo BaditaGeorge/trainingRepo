@@ -57,7 +57,8 @@ function startGame(squares,rows,cols,time){
     function resetGame(){
         for(let i=0;i<rows;i++){
             for(let j=0;j<cols;j++){
-                squares[i][j].style.visibility = 'hidden';
+                squares[i][j].style.backgroundColor = 'black';
+                squares[i][j].style.border = '1px solid white';
                 matrix[i][j] = 0;
             }
         }
@@ -98,10 +99,12 @@ function startGame(squares,rows,cols,time){
             }else{
                 if(matrix[posX][posY] === 0){
                     if(posX > 0){
-                        squares[posX-1][posY].style.visibility = 'hidden';
+                        squares[posX-1][posY].style.backgroundColor = 'black';
+                        squares[posX-1][posY].style.border = '1px solid white';
                         matrix[posX-1][posY] = 0;
                     }
-                    squares[posX][posY].style.visibility = 'visible';
+                    squares[posX][posY].style.backgroundColor = 'white';
+                    squares[posX][posY].style.border = '1px solid black';
                     matrix[posX][posY] = 1;
                     posX += 1;
                 }
@@ -129,90 +132,90 @@ function generateGame(rows,cols,speed){
     gameBoard.style.backgroundColor = 'black';
     gameBoard.style.marginLeft = '200px';
     gameBoard.style.marginTop = '-100px';
-    document.body.addEventListener('keydown',function(e){
-        if(keyDown === false){
-            if((e.keyCode === 37 && posY - 1 >= 0)){
-                if(matrix[posX][posY-1] === 0){
-                    keyDown = true;
-                    posX--;
-                    squares[posX][posY].style.visibility = 'hidden';
-                    matrix[posX][posY] = 0;
-                }
-            }else if((e.keyCode === 39 && posY + 1 < cols)){
-                if(matrix[posX][posY+1] === 0){
-                    keyDown = true;
-                    posX--;
-                    squares[posX][posY].style.visibility = 'hidden';
-                    matrix[posX][posY] = 0;
-                }
-            }else if(e.keyCode === 40 && posX < rows){
-                if(matrix[posX][posY] === 0){
-                    keyDown = true;
-                    posX--;
-                    squares[posX][posY].style.visibility = 'hidden';
-                    matrix[posX][posY] = 0;
-                }
-            }
-        }
+    // document.body.addEventListener('keydown',function(e){
+    //     if(keyDown === false){
+    //         if((e.keyCode === 37 && posY - 1 >= 0)){
+    //             if(matrix[posX][posY-1] === 0){
+    //                 keyDown = true;
+    //                 posX--;
+    //                 squares[posX][posY].style.visibility = 'hidden';
+    //                 matrix[posX][posY] = 0;
+    //             }
+    //         }else if((e.keyCode === 39 && posY + 1 < cols)){
+    //             if(matrix[posX][posY+1] === 0){
+    //                 keyDown = true;
+    //                 posX--;
+    //                 squares[posX][posY].style.visibility = 'hidden';
+    //                 matrix[posX][posY] = 0;
+    //             }
+    //         }else if(e.keyCode === 40 && posX < rows){
+    //             if(matrix[posX][posY] === 0){
+    //                 keyDown = true;
+    //                 posX--;
+    //                 squares[posX][posY].style.visibility = 'hidden';
+    //                 matrix[posX][posY] = 0;
+    //             }
+    //         }
+    //     }
         
-        if(keyDown === true){
-            if(e.keyCode === 37){
-                if(posY - 1 >= 0){
-                    if(matrix[posX][posY-1] === 0){
-                        requestAnimationFrame(()=>{
-                            squares[posX][posY].style.visibility = 'hidden';
-                            matrix[posX][posY] = 0;
-                            squares[posX][posY-1].style.visibility = 'visible';
-                            matrix[posX][posY-1] = 1;
-                            posY -= 1;
-                        });
-                    }else{
-                        prepare(rows);
-                    }
-                }else{
-                    prepare(rows);
-                }
-            }else if(e.keyCode === 39){
-                if(posY + 1 < cols){
-                    if(matrix[posX][posY+1] === 0){
-                        requestAnimationFrame(()=>{
-                            squares[posX][posY].style.visibility = 'hidden';
-                            matrix[posX][posY] = 0;
-                            squares[posX][posY+1].style.visibility = 'visible';
-                            matrix[posX][posY+1] = 1;
-                            posY += 1;
-                        });
-                    }else{
-                        prepare(rows);
-                    }
-                }else{
-                    prepare(rows);
-                }
-            }else if(e.keyCode === 40){
-                if(posX + 1 < rows){
-                    if(matrix[posX+1][posY] === 0){
-                        requestAnimationFrame(()=>{
-                            squares[posX][posY].style.visibility = 'hidden';
-                            matrix[posX][posY] = 0;
-                            squares[posX+1][posY].style.visibility = 'visible';
-                            matrix[posX+1][posY] = 1;
-                            posX += 1;
-                        });
-                    }else{
-                        prepare(rows);
-                    }
-                }else{
-                    prepare(rows);
-                }
-            }
-        }
-    });
-    document.body.addEventListener('keyup',function(e){
-        if(keyDown === true){
-            posX += 1;
-            keyDown = false;
-        }
-    });
+    //     if(keyDown === true){
+    //         if(e.keyCode === 37){
+    //             if(posY - 1 >= 0){
+    //                 if(matrix[posX][posY-1] === 0){
+    //                     requestAnimationFrame(()=>{
+    //                         squares[posX][posY].style.visibility = 'hidden';
+    //                         matrix[posX][posY] = 0;
+    //                         squares[posX][posY-1].style.visibility = 'visible';
+    //                         matrix[posX][posY-1] = 1;
+    //                         posY -= 1;
+    //                     });
+    //                 }else{
+    //                     prepare(rows);
+    //                 }
+    //             }else{
+    //                 prepare(rows);
+    //             }
+    //         }else if(e.keyCode === 39){
+    //             if(posY + 1 < cols){
+    //                 if(matrix[posX][posY+1] === 0){
+    //                     requestAnimationFrame(()=>{
+    //                         squares[posX][posY].style.visibility = 'hidden';
+    //                         matrix[posX][posY] = 0;
+    //                         squares[posX][posY+1].style.visibility = 'visible';
+    //                         matrix[posX][posY+1] = 1;
+    //                         posY += 1;
+    //                     });
+    //                 }else{
+    //                     prepare(rows);
+    //                 }
+    //             }else{
+    //                 prepare(rows);
+    //             }
+    //         }else if(e.keyCode === 40){
+    //             if(posX + 1 < rows){
+    //                 if(matrix[posX+1][posY] === 0){
+    //                     requestAnimationFrame(()=>{
+    //                         squares[posX][posY].style.visibility = 'hidden';
+    //                         matrix[posX][posY] = 0;
+    //                         squares[posX+1][posY].style.visibility = 'visible';
+    //                         matrix[posX+1][posY] = 1;
+    //                         posX += 1;
+    //                     });
+    //                 }else{
+    //                     prepare(rows);
+    //                 }
+    //             }else{
+    //                 prepare(rows);
+    //             }
+    //         }
+    //     }
+    // });
+    // document.body.addEventListener('keyup',function(e){
+    //     if(keyDown === true){
+    //         posX += 1;
+    //         keyDown = false;
+    //     }
+    // });
     document.querySelector('body').appendChild(gameBoard);
     for(let i=0;i<rows;i++){
         squares.push([]);
@@ -224,15 +227,14 @@ function generateGame(rows,cols,speed){
             square.style.width = 20 + 'px';
             square.style.top = i*20 + 'px';
             square.style.left = j*20 + 'px';
-            square.style.border = '1px solid black';
-            square.style.backgroundColor = 'white';
-            square.style.visibility = 'hidden';
+            square.style.border = '1px solid white';
+            square.style.backgroundColor = 'black';
             squares[i].push(square);
             matrix[i].push(0);
             gameBoard.appendChild(square);
         }
     }
-    gameIt++;
+    // gameIt++;
     startGame(squares,rows,cols,250/speed);
 }
 makeControls();
