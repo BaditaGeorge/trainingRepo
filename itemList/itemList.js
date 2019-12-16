@@ -4,7 +4,6 @@ function ListManager(){
     function addOrRemove(e){
         if(e.target.contentEditable === 'false'){
             if(e.target.innerText === '+'){
-                console.log('happened');
                 let li = document.createElement('li');
                 li.style.position = "relative";
                 li.style.listStyleType = "none";
@@ -66,7 +65,6 @@ function ListManager(){
         plus.style.backgroundColor = 'black';
         plus.style.color = 'white';
         minus.style.backgroundColor = 'blue';
-        //myDiv.style.position = 'absolute';
         myDiv.addEventListener('click',function(e){
             addOrRemove(e);
         })
@@ -87,9 +85,6 @@ function ListManager(){
         htmlList.style.marginLeft = '-20px';
         li.appendChild(model);
         htmlList.appendChild(li);
-    }
-    this.addItem = function(){
-        console.log('a');
     }
 }
 let a = new ListManager();

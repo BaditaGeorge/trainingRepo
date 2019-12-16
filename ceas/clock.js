@@ -87,13 +87,9 @@ function Clock(){
     this.execute = function(){
         let clock_shape = create_Shape();
         [middle,secundar,minutar,orar] = draw_arrows(clock_shape);
-        //secundar.style.webkitTransform = 'rotate(30deg)';
         draw_numbers(clock_shape);
     }
     this.moveSecundar = function(){
-        // if(hands.long === 60){
-        //     hands.long = 0;
-        // }
         hands.long += 6;
         hands.medium += 0.1;
         hands.short += (360/(3600 * 12));

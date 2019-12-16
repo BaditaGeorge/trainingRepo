@@ -1,7 +1,3 @@
-// function createAtMouse(){
-
-// }
-// createAtMouse();
 function main() {
     let posX = -1, posY = -1;
     let arr = new Array(1000);
@@ -47,8 +43,6 @@ function main() {
                 arr[i].posY -= arr[i].speed;
                 console.log(arr[i].posY,arr[i].speed);
                 arr[i].div.style.transform = `translate3d(${arr[i].posX}px,${arr[i].posY}px,0px)`;
-                //console.log(window.innerHeight,window.innerWidth);
-                //console.log(arr[i].startL < Math.floor(arr[i].posY) && arr[i].startL > Math.floor(arr[i].posY)-50);
                 ok1 = 1;
             }
         }

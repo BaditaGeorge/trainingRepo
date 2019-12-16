@@ -111,7 +111,6 @@ function MiniGame(){
         first_childs = fillGrid(posX,posY,0,'blue',first_grid);
         posX = 0;
         second_childs = fillGrid(posX,posY,0,'black',second_grid);
-        //makeGrid(posX,posY,300,'black');
     }
 }
 let mG = new MiniGame();
