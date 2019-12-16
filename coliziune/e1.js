@@ -7,6 +7,8 @@ let list_Of_positions = [{ x: 15, y: 15, t: 's', l: 50 },
 let eventAdded = false;
 let dragedObject;
 let lastMouseX, lastMouseY;
+let objectIsBeingDragged = false;
+let mouse;
 function draw_Shapes() {
     for (let elem of list_Of_positions) {
         let x = document.createElement('div');
@@ -16,37 +18,34 @@ function draw_Shapes() {
         x.style.top = elem.x + 'px';
         x.style.left = elem.y + 'px';
         x.style.border = '2px solid black';
+        x.contentEditable = false;
+        x.style.userSelect = 'none';
         if (elem.t === 'c') {
             x.style.borderRadius = '50%';
         }
-        // let dragObject = function(e){
-        //     console.log(eventAdded);
-        //     window.requestAnimationFrame(()=>{
-        //         e.target.style.top = (parseInt(e.pageY) - 5) + 'px';
-        //         e.target.style.left = (parseInt(e.pageX) - 5) + 'px';
-        //     });
-        // };
-        // x.addEventListener('mouseup',function(e){
-        //     eventAdded = false;
-        //     console.log('a');
-        //     x.removeEventListener('mousemove',dragObject);
-        // });
-        // x.addEventListener('mousedown',function(e){
-        //     if(eventAdded === false){
-        //         x.addEventListener('mousemove',dragObject);
-        //         eventAdded = true;
-        //     }
-        // });
         elem.ref = x;
         document.getElementsByTagName('body')[0].appendChild(x);
     }
 }
 
 function dragObject(e) {
-    dragedObject.style.top = parseInt(dragedObject.style.top) - (lastMouseY - e.clientY) + 'px';
-    dragedObject.style.left = parseInt(dragedObject.style.left) - (lastMouseX - e.clientX) + 'px';
-    lastMouseX = e.clientX;
-    lastMouseY = e.clientY;
+    mouse = e;
+    if(objectIsBeingDragged === false){
+        objectIsBeingDragged = true;
+        objectIsMoving();
+    }
+}
+
+function objectIsMoving(){
+    if(objectIsBeingDragged === true){
+        window.requestAnimationFrame(()=>{
+            dragedObject.style.top = parseInt(dragedObject.style.top) - (lastMouseY - mouse.clientY) + 'px';
+            dragedObject.style.left = parseInt(dragedObject.style.left) - (lastMouseX - mouse.clientX) + 'px';
+            lastMouseX = mouse.clientX;
+            lastMouseY = mouse.clientY;
+            objectIsMoving();
+        });
+    }
 }
 
 function onMouseUp(e) {
@@ -57,7 +56,7 @@ function onMouseUp(e) {
             break;
         }
     }
-    dragedObject = undefined;
+    objectIsBeingDragged = false;
     document.removeEventListener('mousemove', dragObject);
     document.removeEventListener('mouseup', onMouseUp);
     check_circles_overlaping();
