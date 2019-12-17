@@ -45,13 +45,12 @@ let squares = [];
 let matrix = [];
 let gameBoard;
 let posX = 0 , posY = 0;
-let lastX = 0,lastY = 0;
-let lastY_2 = 0;
 let gameIt = 0;
 let keyDown = false;
 let add = 0;
 let lastFull = 0;
 let pause = false;
+let lTime = undefined;
 let fullRows = 0;
 function startGame(squares,rows,cols,time){
     function resetGame(){
@@ -70,43 +69,123 @@ function startGame(squares,rows,cols,time){
     }
     function countRows(){
         let counter = 0;
-        for(let i=0;i<cols;i++){
-            if(matrix[lastFull][i] === 1){
-                counter += 1;
+        let Fr = 0;
+        for(let it = 0; it < rows; it++){
+            counter = 0;
+            for(let i=0;i<cols;i++){
+                if(matrix[it][i] === 2){
+                    counter += 1;
+                }
             }
-        }
-        if(counter === cols){
-            lastFull = lastFull - 1;
-            fullRows += 1;
-            label.innerText = 'Completed rows: ' + fullRows.toString();
+            if(counter === cols){
+                Fr++;
+                if(Fr > fullRows){
+                    fullRows = Fr;
+                    label.innerText = 'Completed rows: ' + fullRows.toString();
+                }
+            }
         }
     }
-    setInterval(()=>{
-        if(isPaused === false){
-            if(posX === rows){
-                posX = 0;
-                countRows();
-                if(matrix[posX][posY] === 1){
-                    resetGame();
+
+    function cleanGrid(){
+        for(let i=0;i<rows;i++){
+            for(let j=0;j<cols;j++){
+                if(matrix[i][j] === 1){
+                    matrix[i][j] = 0;
+                    squares[i][j].style.backgroundColor = 'black';
+                    squares[i][j].style.border = '1px solid white';
                 }
             }
-            if(matrix[posX][posY] === 1){
+        }
+    }
+
+    function colorGrid(){
+        for(let i=0;i<rows;i++){
+            for(let j=0;j<cols;j++){
+                if(matrix[i][j] > 0){
+                    squares[i][j].style.backgroundColor = 'white';
+                    squares[i][j].style.border = '1px solid black';
+                }
+            }
+        }
+    }
+
+    document.addEventListener('keyup',function(e){
+        keyDown = false;
+        if(lTime !== undefined){
+            time = lTime;
+            lTime = undefined;
+        }
+    });
+
+    document.addEventListener('keydown',function(e){
+        let prPosY = posY;
+        let prPosX = posX;
+        if(keyDown === false && posX < rows){
+            keyDown = true;
+            if(e.keyCode === 37){
+                if(posY - 1 >= 0){
+                    if(matrix[posX][posY-1] === 0){
+                        posY -= 1
+                    }
+                }
+            }else if(e.keyCode === 39){
+                if(posY + 1 < cols){
+                    if(matrix[posX][posY+1] === 0){
+                        posY += 1;
+                    }
+                }
+            }else if(e.keyCode === 40){
+                if(posX + 1 < rows){
+                    if(matrix[posX+1][posY] === 0){
+                        posX += 1;
+                    }
+                }
+            }
+        }
+        if(keyDown === true){
+            window.requestAnimationFrame(()=>{
+                cleanGrid();
+                if(posX < rows && posY < cols){
+                    if(matrix[prPosX][prPosY] != 2 && matrix[posX][posY] == 0){
+                        matrix[prPosX][prPosY] = 0;
+                        squares[prPosX][prPosY].style.backgroundColor = 'black';
+                        squares[prPosX][prPosY].style.border = '1px solid white';
+                        matrix[posX][posY] = 1;
+                        squares[posX][posY].style.backgroundColor = 'white';
+                        squares[posX][posY].style.border = '1px solid black';
+                    }
+                }
+                keyDown = false;
+            });
+        }
+    });
+
+    setInterval(()=>{
+        if(isPaused === false){
+            if(posX === 0 && matrix[posX][posY] === 2){
+                resetGame();
+            }
+            if(posX === rows){
+                matrix[posX-1][posY] = 2;
                 posX = 0;
                 countRows();
-                if(matrix[posX][posY] === 1){
-                    resetGame();
-                }
-            }else{
-                if(matrix[posX][posY] === 0){
-                    if(posX > 0){
-                        squares[posX-1][posY].style.backgroundColor = 'black';
-                        squares[posX-1][posY].style.border = '1px solid white';
-                        matrix[posX-1][posY] = 0;
-                    }
-                    squares[posX][posY].style.backgroundColor = 'white';
-                    squares[posX][posY].style.border = '1px solid black';
+            }
+            else{
+                if(matrix[posX][posY] === 2){
+                    matrix[posX-1][posY] = 2;
+                    // squares[posX-1][posY].style.backgroundColor = 'white';
+                    // squares[posX-1][posY].style.border = '1px solid black';
+                    colorGrid();
+                    countRows();
+                    posX = 0;
+                }else{
+                    cleanGrid();
                     matrix[posX][posY] = 1;
-                    posX += 1;
+                    colorGrid();
+                    // squares[posX][posY].style.backgroundColor = 'white';
+                    // squares[posX][posY].style.border = '1px solid black';
+                    posX++;
                 }
             }
         }
@@ -122,7 +201,7 @@ function generateGame(rows,cols,speed){
         matrix = [];
         gameBoard.style.display = 'none';
     }
-    lastFull = rows-1;
+    lastFull = rows-1; 
     posX = 0;
     posY = 0;
     gameBoard = document.createElement('div');
@@ -132,89 +211,25 @@ function generateGame(rows,cols,speed){
     gameBoard.style.backgroundColor = 'black';
     gameBoard.style.marginLeft = '200px';
     gameBoard.style.marginTop = '-100px';
-    // document.body.addEventListener('keydown',function(e){
-    //     if(keyDown === false){
-    //         if((e.keyCode === 37 && posY - 1 >= 0)){
-    //             if(matrix[posX][posY-1] === 0){
-    //                 keyDown = true;
-    //                 posX--;
-    //                 squares[posX][posY].style.visibility = 'hidden';
-    //                 matrix[posX][posY] = 0;
-    //             }
-    //         }else if((e.keyCode === 39 && posY + 1 < cols)){
-    //             if(matrix[posX][posY+1] === 0){
-    //                 keyDown = true;
-    //                 posX--;
-    //                 squares[posX][posY].style.visibility = 'hidden';
-    //                 matrix[posX][posY] = 0;
-    //             }
-    //         }else if(e.keyCode === 40 && posX < rows){
-    //             if(matrix[posX][posY] === 0){
-    //                 keyDown = true;
-    //                 posX--;
-    //                 squares[posX][posY].style.visibility = 'hidden';
-    //                 matrix[posX][posY] = 0;
-    //             }
+    // document.addEventListener('keydown',function(e){
+    //     let prPosY = posY;
+    //     if(e.keyCode === 37){
+    //         if(posY - 1 >= 0){
+    //             posY -= 1;
+    //         }
+    //     }else if(e.keyCode === 39){
+    //         if(posY + 1 < rows){
+    //             posY += 1;
     //         }
     //     }
-        
-    //     if(keyDown === true){
-    //         if(e.keyCode === 37){
-    //             if(posY - 1 >= 0){
-    //                 if(matrix[posX][posY-1] === 0){
-    //                     requestAnimationFrame(()=>{
-    //                         squares[posX][posY].style.visibility = 'hidden';
-    //                         matrix[posX][posY] = 0;
-    //                         squares[posX][posY-1].style.visibility = 'visible';
-    //                         matrix[posX][posY-1] = 1;
-    //                         posY -= 1;
-    //                     });
-    //                 }else{
-    //                     prepare(rows);
-    //                 }
-    //             }else{
-    //                 prepare(rows);
-    //             }
-    //         }else if(e.keyCode === 39){
-    //             if(posY + 1 < cols){
-    //                 if(matrix[posX][posY+1] === 0){
-    //                     requestAnimationFrame(()=>{
-    //                         squares[posX][posY].style.visibility = 'hidden';
-    //                         matrix[posX][posY] = 0;
-    //                         squares[posX][posY+1].style.visibility = 'visible';
-    //                         matrix[posX][posY+1] = 1;
-    //                         posY += 1;
-    //                     });
-    //                 }else{
-    //                     prepare(rows);
-    //                 }
-    //             }else{
-    //                 prepare(rows);
-    //             }
-    //         }else if(e.keyCode === 40){
-    //             if(posX + 1 < rows){
-    //                 if(matrix[posX+1][posY] === 0){
-    //                     requestAnimationFrame(()=>{
-    //                         squares[posX][posY].style.visibility = 'hidden';
-    //                         matrix[posX][posY] = 0;
-    //                         squares[posX+1][posY].style.visibility = 'visible';
-    //                         matrix[posX+1][posY] = 1;
-    //                         posX += 1;
-    //                     });
-    //                 }else{
-    //                     prepare(rows);
-    //                 }
-    //             }else{
-    //                 prepare(rows);
-    //             }
-    //         }
-    //     }
-    // });
-    // document.body.addEventListener('keyup',function(e){
-    //     if(keyDown === true){
-    //         posX += 1;
-    //         keyDown = false;
-    //     }
+    //     window.requestAnimationFrame(()=>{
+    //         matrix[posX][prPosY] = 0;
+    //         squares[posX][prPosY].style.backgroundColor = 'black';
+    //         squares[posX][prPosY].style.border = '1px solid white';
+    //         matrix[posX][posY] = 1;
+    //         squares[posX][posY].style.backgroundColor = 'white';
+    //         squares[posX][posY].style.border = '1px solid black';
+    //     });
     // });
     document.querySelector('body').appendChild(gameBoard);
     for(let i=0;i<rows;i++){
@@ -234,7 +249,6 @@ function generateGame(rows,cols,speed){
             gameBoard.appendChild(square);
         }
     }
-    // gameIt++;
     startGame(squares,rows,cols,250/speed);
 }
 makeControls();
