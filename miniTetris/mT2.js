@@ -174,8 +174,6 @@ function startGame(squares,rows,cols,time){
             else{
                 if(matrix[posX][posY] === 2){
                     matrix[posX-1][posY] = 2;
-                    // squares[posX-1][posY].style.backgroundColor = 'white';
-                    // squares[posX-1][posY].style.border = '1px solid black';
                     colorGrid();
                     countRows();
                     posX = 0;
@@ -183,8 +181,6 @@ function startGame(squares,rows,cols,time){
                     cleanGrid();
                     matrix[posX][posY] = 1;
                     colorGrid();
-                    // squares[posX][posY].style.backgroundColor = 'white';
-                    // squares[posX][posY].style.border = '1px solid black';
                     posX++;
                 }
             }
@@ -197,10 +193,18 @@ function prepare(rows){
 }
 function generateGame(rows,cols,speed){
     if(gameBoard !== undefined){
+        posX = posY = 0;
+        for(let i=0;i<squares.length;i++){
+            for(let j=0;j<squares[i].length;j++){
+                gameBoard.removeChild(squares[i][j]);
+            }
+        }
         squares = [];
         matrix = [];
-        gameBoard.style.display = 'none';
+        document.querySelector('body').removeChild(gameBoard);
+        gameBoard = undefined;
     }
+
     lastFull = rows-1; 
     posX = 0;
     posY = 0;
@@ -211,26 +215,7 @@ function generateGame(rows,cols,speed){
     gameBoard.style.backgroundColor = 'black';
     gameBoard.style.marginLeft = '200px';
     gameBoard.style.marginTop = '-100px';
-    // document.addEventListener('keydown',function(e){
-    //     let prPosY = posY;
-    //     if(e.keyCode === 37){
-    //         if(posY - 1 >= 0){
-    //             posY -= 1;
-    //         }
-    //     }else if(e.keyCode === 39){
-    //         if(posY + 1 < rows){
-    //             posY += 1;
-    //         }
-    //     }
-    //     window.requestAnimationFrame(()=>{
-    //         matrix[posX][prPosY] = 0;
-    //         squares[posX][prPosY].style.backgroundColor = 'black';
-    //         squares[posX][prPosY].style.border = '1px solid white';
-    //         matrix[posX][posY] = 1;
-    //         squares[posX][posY].style.backgroundColor = 'white';
-    //         squares[posX][posY].style.border = '1px solid black';
-    //     });
-    // });
+    
     document.querySelector('body').appendChild(gameBoard);
     for(let i=0;i<rows;i++){
         squares.push([]);
@@ -246,7 +231,7 @@ function generateGame(rows,cols,speed){
             square.style.backgroundColor = 'black';
             squares[i].push(square);
             matrix[i].push(0);
-            gameBoard.appendChild(square);
+            gameBoard.appendChild(squares[i][j]);
         }
     }
     startGame(squares,rows,cols,250/speed);
