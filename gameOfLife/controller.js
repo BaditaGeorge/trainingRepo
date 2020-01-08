@@ -39,7 +39,7 @@ function controller() {
             model.drawModel(mainBody.childNodes[1].value);
         }
         let matrix = model.getMatrix();
-        view.updateView(mainBody.childNodes[0].value, matrix);
+        view.updateView(matrix);
         if (wasUndef === true) {
             gameZone.appendChild(view.getView());
             document.querySelector('body').appendChild(gameZone);

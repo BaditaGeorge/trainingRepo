@@ -1,14 +1,44 @@
-function view() {
-
+function TextView(){
     let gameView;
-    let gameMatrixView;
-
-    function createTextView() {
-        gameView = document.createElement('p');
-        gameView.style.fontSize = '11px';
+    let boardSize;
+    function createView() {
+            gameView = document.createElement('p');
+            gameView.style.fontSize = '11px';
     }
 
-    function createDOMView() {
+    function updateView(gameMatrix) {
+        let strMatrix = '';
+        // gameView.innerText = '';
+        for (let i = 0; i < gameMatrix.length; i++) {
+            for (let j = 0; j < gameMatrix[i].length; j++) {
+                if (gameMatrix[i][j] === 1) {
+                    strMatrix += '<span class="spanStyle">1</span>';
+                } else {
+                    strMatrix += '0';
+                }
+                strMatrix += ' ';
+            }
+            strMatrix += '<br>';
+        }
+        gameView.innerHTML = strMatrix;
+    }
+
+    function getView(){
+        return gameView;
+    }
+
+    function updateBoardSize(newBoardSize){
+        boardSize = newBoardSize;
+    }
+
+    return {
+        createView:createView,
+        updateView:updateView,
+        getView:getView
+    }
+}
+function DOMView(){
+    function createView() {
         gameView = document.createElement('div');
         gameView.style.width = '500px';
         gameView.style.height = '500px';
@@ -31,13 +61,30 @@ function view() {
         }
     }
 
-    function createCanvasView() {
-        gameView = document.createElement('canvas');
-        gameView.width = 500;
-        gameView.height = 500;
+    function updateView(gameMatrix) {
+        for (let i = 0; i < gameMatrixView.length; i++) {
+            for (let j = 0; j < gameMatrixView[i].length; j++) {
+                if (gameMatrix[i][j] === 0) {
+                    gameMatrixView[i][j].style.backgroundColor = 'white';
+                } else {
+                    gameMatrixView[i][j].style.backgroundColor = 'red';
+                }
+            }
+        }
     }
 
-    function createSVGView() {
+    function getView(){
+        return gameView;
+    }
+
+    return {
+        createView:createView,
+        updateView:updateView,
+        getView:getView
+    }
+}
+function SVGView(){
+    function createView() {
         let svngs = 'http://www.w3.org/2000/svg';
         gameView = document.createElementNS(svngs, 'svg');
         gameView.setAttribute('width', '500');
@@ -62,7 +109,7 @@ function view() {
         }
     }
 
-    function updateSVGView(gameMatrix) {
+    function updateView(gameMatrix) {
         for (let i = 0; i < gameMatrix.length; i++) {
             for (let j = 0; j < gameMatrix[i].length; j++) {
                 if (gameMatrix[i][j] === 0) {
@@ -74,7 +121,25 @@ function view() {
         }
     }
 
-    function updateCanvasView(gameMatrix) {
+    function getView(){
+        return gameView;
+    }
+
+    return {
+        createView:createView,
+        updateView:updateView,
+        getView:getView
+    }
+}
+function CanvasView(){
+
+    function createView() {
+        gameView = document.createElement('canvas');
+        gameView.width = 500;
+        gameView.height = 500;
+    }
+    
+    function updateView(gameMatrix) {
         let ctx = gameView.getContext('2d');
         ctx.fillStyle = 'black';
         ctx.fillRect(0, 0, 500, 500);
@@ -85,70 +150,50 @@ function view() {
                 } else {
                     ctx.fillStyle = 'red';
                 }
-                ctx.fillRect(j * 10, i * 10, 10, 10);
+                ctx.fillRect(j * 10, i * 10, 9, 9);
             }
         }
     }
 
-    function updateTextView(gameMatrix) {
-        let strMatrix = '';
-        // gameView.innerText = '';
-        for (let i = 0; i < gameMatrix.length; i++) {
-            for (let j = 0; j < gameMatrix[i].length; j++) {
-                if (gameMatrix[i][j] === 1) {
-                    strMatrix += '<span class="spanStyle">1</span>';
-                } else {
-                    strMatrix += '0';
-                }
-                strMatrix += ' ';
-            }
-            strMatrix += '<br>';
-        }
-        gameView.innerHTML = strMatrix;
+    function getView(){
+        return gameView;
     }
 
-    function updateDOMView(gameMatrix) {
-        for (let i = 0; i < gameMatrixView.length; i++) {
-            for (let j = 0; j < gameMatrixView[i].length; j++) {
-                if (gameMatrix[i][j] === 0) {
-                    gameMatrixView[i][j].style.backgroundColor = 'white';
-                } else {
-                    gameMatrixView[i][j].style.backgroundColor = 'red';
-                }
-            }
-        }
+    return {
+        createView:createView,
+        updateView:updateView,
+        getView:getView
     }
+
+}
+function view() {
+
+    let gameView;
+    let gameMatrixView;
+    let viewObject;
 
     //here is the function where i create the view, i made html element that will reflect changes from the matrix
     //type is the type of view that our application is going to display
     function createView(typeOfView) {
         typeOfView = parseInt(typeOfView);
         if (typeOfView === 1) {
-            createTextView();
+            viewObject = new TextView();
         } else if (typeOfView === 2) {
-            createSVGView();
+            viewObject = new SVGView();
         } else if (typeOfView === 3) {
-            createDOMView();
+            viewObject = new DOMView();
         } else if (typeOfView === 4) {
-            createCanvasView();
+            viewObject = new CanvasView();
         }
+        viewObject.createView();
     }
 
-    function updateView(typeOfView, gameMatrix) {
-        typeOfView = parseInt(typeOfView);
-        if (typeOfView === 1) {
-            updateTextView(gameMatrix);
-        } else if (typeOfView === 2) {
-            updateSVGView(gameMatrix);
-        } else if (typeOfView === 3) {
-            updateDOMView(gameMatrix);
-        } else if (typeOfView === 4) {
-            updateCanvasView(gameMatrix);
-        }
+    function updateView(gameMatrix) {
+        viewObject.updateView(gameMatrix);
     }
 
     function getView() {
-        return gameView;
+        return viewObject.getView();
     }
 
     return {
