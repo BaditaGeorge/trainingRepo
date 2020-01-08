@@ -13,6 +13,16 @@ function model() {
         }
     }
 
+    // function updateMatrixSize(zoomed){
+    //     let tMatrix = matrix;
+    //     if(zoomed)
+    //     for(let i=0;i<nr_Rows*zoomed;i++){
+    //         for(let j=0;j<nr_Cols*zoomed;j++){
+    //             if(j>=25;j<=)
+    //         }
+    //     }
+    // }
+
     //here i draw a specific form on the table, form varies by user's option
     //basically, i mark with 1 celss which are component of the initial form
     function drawModel(type) {
@@ -89,7 +99,7 @@ function model() {
         for (let i = 0; i < nr_Rows; i++) {
             for (let j = 0; j < nr_Cols; j++) {
                 if (matrix[i][j] === 1) {
-                    livings.push([i,j]);
+                    livings.push([i, j]);
                 }
             }
         }
@@ -106,24 +116,24 @@ function model() {
                 let neighbors = countNeighbors(i, j);
                 //no neighbor, cell dies
                 if (neighbors <= 1) {
-                    toRem.push([i,j]);
+                    toRem.push([i, j]);
                 } else if (neighbors <= 3) {
                     //2 or 3 neighbors, cell is starting to live
                     if (matrix[i][j] === 0) {
                         if (neighbors === 3) {
-                            toAdd.push([i,j]);
+                            toAdd.push([i, j]);
                         }
                     }
                 } else if (neighbors >= 4) {
                     //too many neighbors, cell dies
-                    toRem.push([i,j]);
+                    toRem.push([i, j]);
                 }
             }
         }
-        for(let i=0;i<toAdd.length;i++){
+        for (let i = 0; i < toAdd.length; i++) {
             matrix[toAdd[i][0]][toAdd[i][1]] = 1;
         }
-        for(let i=0;i<toRem.length;i++){
+        for (let i = 0; i < toRem.length; i++) {
             matrix[toRem[i][0]][toRem[i][1]] = 0;
         }
     }
@@ -137,261 +147,364 @@ function model() {
         createMatrix: createMatrix,
         drawModel: drawModel,
         playGame: playGame,
-        getMatrix:getMatrix
+        getMatrix: getMatrix
     };
 }
 
 //here is the view part of the application
-function view() {
+// function view() {
 
-    let gameView;
-    let gameMatrixView;
+//     let gameView;
+//     let gameMatrixView;
 
-    function createTextView(){
-        gameView = document.createElement('p');
-        gameView.style.fontSize = '11px';
-    }
+//     function createTextView() {
+//         gameView = document.createElement('p');
+//         gameView.style.fontSize = '11px';
+//     }
 
-    function createDOMView(){
-        gameView = document.createElement('div');
-        gameView.style.width = '500px';
-        gameView.style.height = '500px';
-        gameView.style.position = 'relative';
-        gameMatrixView = [];
-        console.log('creating');
-        for(let i=0;i<50;i++){
-            gameMatrixView.push([]);
-            for(let j=0;j<50;j++){
-                let el = document.createElement('div');
-                el.style.width = '9px';
-                el.style.height = '9px';
-                el.style.backgroundColor = 'white';
-                el.style.border = '1px solid black';
-                el.style.position = 'absolute';
-                el.style.top = i*10 + 'px';
-                el.style.left = j*10 + 'px';
-                gameView.appendChild(el);
-                gameMatrixView[i].push(el);
-            }
-        }
-    }
+//     function createDOMView() {
+//         gameView = document.createElement('div');
+//         gameView.style.width = '500px';
+//         gameView.style.height = '500px';
+//         gameView.style.position = 'relative';
+//         gameMatrixView = [];
+//         for (let i = 0; i < 50; i++) {
+//             gameMatrixView.push([]);
+//             for (let j = 0; j < 50; j++) {
+//                 let el = document.createElement('div');
+//                 el.style.width = '9px';
+//                 el.style.height = '9px';
+//                 el.style.backgroundColor = 'white';
+//                 el.style.border = '1px solid black';
+//                 el.style.position = 'absolute';
+//                 el.style.top = i * 10 + 'px';
+//                 el.style.left = j * 10 + 'px';
+//                 gameView.appendChild(el);
+//                 gameMatrixView[i].push(el);
+//             }
+//         }
+//     }
 
-    function updateTextView(gameMatrix){
-        let strMatrix = '';
-        console.log(gameMatrix.length);
-        for(let i=0;i<gameMatrix.length;i++){
-            for(let j=0;j<gameMatrix[i].length;j++){
-                strMatrix += gameMatrix[i][j].toString();
-                strMatrix += ' ';
-            }
-            strMatrix += '\n';
-        }
-        gameView.innerText = strMatrix;
-    }
+//     function createCanvasView() {
+//         gameView = document.createElement('canvas');
+//         gameView.width = 500;
+//         gameView.height = 500;
+//     }
 
-    function updateDOMView(gameMatrix){
-        for(let i=0;i<gameMatrixView.length;i++){
-            for(let j=0;j<gameMatrixView[i].length;j++){
-                if(gameMatrix[i][j] === 0){
-                    gameMatrixView[i][j].style.backgroundColor = 'white';
-                }else{
-                    gameMatrixView[i][j].style.backgroundColor = 'red';
-                }
-            }
-        }
-    }
+//     function createSVGView() {
+//         let svngs = 'http://www.w3.org/2000/svg';
+//         gameView = document.createElementNS(svngs, 'svg');
+//         gameView.setAttribute('width', '500px');
+//         gameView.setAttribute('height', '500px');
+//         gameMatrixView = [];
+//         for (let i = 0; i < 50; i++) {
+//             gameMatrixView.push([]);
+//             for (let j = 0; j < 50; j++) {
+//                 let rect = document.createElementNS(svngs, 'rect');
+//                 rect.setAttributeNS(null, 'x', j * 10);
+//                 rect.setAttributeNS(null, 'y', i * 10);
+//                 rect.setAttributeNS(null, 'height', '9');
+//                 rect.setAttributeNS(null, 'width', '9');
+//                 rect.setAttributeNS(null, 'fill', 'white');
+//                 rect.setAttributeNS(null, 'stroke', 'black');
+//                 rect.setAttributeNS(null, 'stroke-width', '1');
+//                 gameView.appendChild(rect);
+//                 gameMatrixView[i].push(rect);
+//             }
+//         }
+//     }
 
-    //here is the function where i create the view, i made html element that will reflect changes from the matrix
-    //type is the type of view that our application is going to display
-    function createView(typeOfView) {
-        typeOfView = parseInt(typeOfView);
-        if(typeOfView === 1){
-            createTextView();
-        }else if(typeOfView === 2){
+//     function updateSVGView(gameMatrix) {
+//         for (let i = 0; i < gameMatrix.length; i++) {
+//             for (let j = 0; j < gameMatrix[i].length; j++) {
+//                 if (gameMatrix[i][j] === 0) {
+//                     gameMatrixView[i][j].setAttributeNS(null, 'fill', 'white');
+//                 } else {
+//                     gameMatrixView[i][j].setAttributeNS(null, 'fill', 'red');
+//                 }
+//             }
+//         }
+//     }
 
-        }else if(typeOfView === 3){
-            createDOMView();
-        }else if(typeOfView === 4){
+//     function updateCanvasView(gameMatrix) {
+//         let ctx = gameView.getContext('2d');
+//         ctx.fillStyle = 'black';
+//         ctx.fillRect(0, 0, 500, 500);
+//         for (let i = 0; i < gameMatrix.length; i++) {
+//             for (let j = 0; j < gameMatrix[i].length; j++) {
+//                 if (gameMatrix[i][j] === 0) {
+//                     ctx.fillStyle = 'white';
+//                 } else {
+//                     ctx.fillStyle = 'red';
+//                 }
+//                 ctx.fillRect(j * 10, i * 10, 9, 9);
+//             }
+//         }
+//     }
 
-        }
-    }
+//     function updateTextView(gameMatrix) {
+//         let strMatrix = '';
+//         // gameView.innerText = '';
+//         for (let i = 0; i < gameMatrix.length; i++) {
+//             for (let j = 0; j < gameMatrix[i].length; j++) {
+//                 if (gameMatrix[i][j] === 1) {
+//                     strMatrix += '<span class="spanStyle">1</span>';
+//                 } else {
+//                     strMatrix += '0';
+//                 }
+//                 strMatrix += ' ';
+//             }
+//             strMatrix += '<br>';
+//         }
+//         gameView.innerHTML = strMatrix;
+//     }
 
-    function updateView(typeOfView,gameMatrix){
-        typeOfView = parseInt(typeOfView);
-        console.log(typeOfView);
-        if(typeOfView === 1){
-            updateTextView(gameMatrix);
-        }else if(typeOfView === 2){
+//     function updateDOMView(gameMatrix) {
+//         for (let i = 0; i < gameMatrixView.length; i++) {
+//             for (let j = 0; j < gameMatrixView[i].length; j++) {
+//                 if (gameMatrix[i][j] === 0) {
+//                     gameMatrixView[i][j].style.backgroundColor = 'white';
+//                 } else {
+//                     gameMatrixView[i][j].style.backgroundColor = 'red';
+//                 }
+//             }
+//         }
+//     }
 
-        }else if(typeOfView === 3){
-            updateDOMView(gameMatrix);
-        }else if(typeOfView === 4){
+//     //here is the function where i create the view, i made html element that will reflect changes from the matrix
+//     //type is the type of view that our application is going to display
+//     function createView(typeOfView) {
+//         typeOfView = parseInt(typeOfView);
+//         if (typeOfView === 1) {
+//             createTextView();
+//         } else if (typeOfView === 2) {
+//             createSVGView();
+//         } else if (typeOfView === 3) {
+//             createDOMView();
+//         } else if (typeOfView === 4) {
+//             createCanvasView();
+//         }
+//     }
 
-        }
-    }
+//     function updateView(typeOfView, gameMatrix) {
+//         typeOfView = parseInt(typeOfView);
+//         if (typeOfView === 1) {
+//             updateTextView(gameMatrix);
+//         } else if (typeOfView === 2) {
+//             updateSVGView(gameMatrix);
+//         } else if (typeOfView === 3) {
+//             updateDOMView(gameMatrix);
+//         } else if (typeOfView === 4) {
+//             updateCanvasView(gameMatrix);
+//         }
+//     }
 
-    function getView(){
-        return gameView;
-    }
+//     function getView() {
+//         return gameView;
+//     }
 
-    return {
-        createView:createView,
-        updateView:updateView,
-        getView:getView
-    }
-}
+//     return {
+//         createView: createView,
+//         updateView: updateView,
+//         getView: getView
+//     }
+// }
 
 //static part of the application
 //controls the view 
-function controller(){
-    let mainBody;
-    let model;
-    let view;
-    let gameOn = false;
-    let gameZone;
-    function setModel(mainModel){
-        model = mainModel;
-    }
 
-    function setView(mainView){
-        view = mainView;
-    }
+// function controller() {
+//     let mainBody;
+//     let model;
+//     let view;
+//     let gameOn = false;
+//     let gameZone;
+//     let intervalTime = 500;
+//     let initIntervalTime = 500;
+//     let interval;
+//     let bGDim = 1;
+//     function setModel(mainModel) {
+//         model = mainModel;
+//     }
 
-    function putInPage(){
-        console.log(mainBody.childNodes[0].value);
-        console.log(mainBody.childNodes[1].value);
-        document.querySelector('body').appendChild(mainBody);
-    }
+//     function setView(mainView) {
+//         view = mainView;
+//     }
 
-    function displayGame(redo){
-        let wasUndef = false;
-        if(gameZone === undefined){
-            gameZone = document.createElement('div');
-            gameZone.style.width = '500px';
-            gameZone.style.height = '500px';
-            wasUndef = true;
-        }
-        if(wasUndef === false){
-            model.playGame();
-        }
-        if(wasUndef === true){
-            view.createView(mainBody.childNodes[0].value);
-        }
-        if(wasUndef === true || redo !== undefined){
-            model.createMatrix();
-            model.drawModel(mainBody.childNodes[1].value);
-        }
-        let matrix = model.getMatrix();
-        view.updateView(mainBody.childNodes[0].value,matrix);
-        if(wasUndef === true){
-            gameZone.appendChild(view.getView());
-            document.querySelector('body').appendChild(gameZone);
-        }
-    }
+//     function putInPage() {
+//         document.querySelector('body').appendChild(mainBody);
+//     }
 
-    function play(){
-        
-    }
+//     function displayGame(redo) {
+//         let wasUndef = false;
+//         if (gameZone === undefined) {
+//             gameZone = document.createElement('div');
+//             gameZone.style.width = '500px';
+//             gameZone.style.height = '500px';
+//             wasUndef = true;
+//         }
+//         if (wasUndef === false) {
+//             model.playGame();
+//         }
+//         if (wasUndef === true) {
+//             view.createView(mainBody.childNodes[0].value);
+//         }
+//         if (wasUndef === true || redo !== undefined) {
+//             model.createMatrix();
+//             model.drawModel(mainBody.childNodes[1].value);
+//         }
+//         let matrix = model.getMatrix();
+//         view.updateView(mainBody.childNodes[0].value, matrix);
+//         if (wasUndef === true) {
+//             gameZone.appendChild(view.getView());
+//             document.querySelector('body').appendChild(gameZone);
+//         }
+//     }
 
-    function createController(){
-        mainBody = document.createElement('div');
-        let boardType = document.createElement('select');
-        let text = document.createElement('option');
-        let svg = document.createElement('option');
-        let dom = document.createElement('option');
-        let cnv = document.createElement('option');
-        text.value = 1;
-        text.innerText = 'Text';
-        svg.value = 2;
-        svg.innerText = 'SVG';
-        dom.value = 3;
-        dom.innerText = 'DOM';
-        cnv.value = 4;
-        cnv.innerText = 'Canvas';
-        boardType.appendChild(text);
-        boardType.appendChild(svg);
-        boardType.appendChild(dom);
-        boardType.appendChild(cnv);
-        let gameType = document.createElement('select');
-        let type0 = document.createElement('option');
-        let type1 = document.createElement('option');
-        let type2 = document.createElement('option');
-        let type3 = document.createElement('option');
-        let type4 = document.createElement('option');
-        type0.value = 0;
-        type0.innerText = 'Type 0';
-        type1.value = 1;
-        type1.innerText = 'Type 1';
-        type2.value = 2;
-        type2.innerText = 'Type 2';
-        type3.value = 3;
-        type3.innerText = 'Type 3';
-        type4.value = 4;
-        type4.innerText = 'Type 4';
-        gameType.appendChild(type0);
-        gameType.appendChild(type1);
-        gameType.appendChild(type2);
-        gameType.appendChild(type3);
-        gameType.appendChild(type4);
-        let actionBtn = document.createElement('button');
-        let playBtn = document.createElement('button');
-        actionBtn.addEventListener('click',function(){
-            displayGame();
-        });
-        gameType.addEventListener('change',function(){
-            displayGame(true);
-        });
-        boardType.addEventListener('change',function(){
-            document.querySelector('body').removeChild(gameZone);
-            gameZone = undefined;
-            displayGame();
-        });
-        let speed = document.createElement('input');
-        speed.type = 'range';
-        speed.min = 10;
-        speed.max = 50;
-        speed.step = 5;
-        speed.value = 10;
-        speed.tile = 'speed dial';
-        let zoom = document.createElement('input');
-        zoom.type = 'range';
-        zoom.min = 1;
-        zoom.max = 4;
-        zoom.step = 1;
-        zoom.value = 1;
-        zoom.title = 'grid size';
-        actionBtn.innerText = 'Next';
-        playBtn.innerText = 'Start';
-        mainBody.appendChild(boardType);
-        mainBody.appendChild(gameType);
-        mainBody.appendChild(actionBtn);
-        mainBody.appendChild(playBtn);
-        mainBody.appendChild(speed);
-        mainBody.appendChild(zoom);
-    }
+//     function play() {
+//         interval = setInterval(function () {
+//             if (gameOn === true) {
+//                 displayGame();
+//             }
+//         }, intervalTime);
+//     }
 
-    function getMain(){
-        return mainBody;
-    }
+//     function createController() {
+//         mainBody = document.createElement('div');
+//         let boardType = document.createElement('select');
+//         let text = document.createElement('option');
+//         let svg = document.createElement('option');
+//         let dom = document.createElement('option');
+//         let cnv = document.createElement('option');
+//         let isDown = false;
+//         text.value = 1;
+//         text.innerText = 'Text';
+//         svg.value = 2;
+//         svg.innerText = 'SVG';
+//         dom.value = 3;
+//         dom.innerText = 'DOM';
+//         cnv.value = 4;
+//         cnv.innerText = 'Canvas';
+//         boardType.appendChild(text);
+//         boardType.appendChild(svg);
+//         boardType.appendChild(dom);
+//         boardType.appendChild(cnv);
+//         let gameType = document.createElement('select');
+//         let type0 = document.createElement('option');
+//         let type1 = document.createElement('option');
+//         let type2 = document.createElement('option');
+//         let type3 = document.createElement('option');
+//         let type4 = document.createElement('option');
+//         type0.value = 0;
+//         type0.innerText = 'Type 0';
+//         type1.value = 1;
+//         type1.innerText = 'Type 1';
+//         type2.value = 2;
+//         type2.innerText = 'Type 2';
+//         type3.value = 3;
+//         type3.innerText = 'Type 3';
+//         type4.value = 4;
+//         type4.innerText = 'Type 4';
+//         gameType.appendChild(type0);
+//         gameType.appendChild(type1);
+//         gameType.appendChild(type2);
+//         gameType.appendChild(type3);
+//         gameType.appendChild(type4);
+//         let actionBtn = document.createElement('button');
+//         let playBtn = document.createElement('button');
+//         actionBtn.addEventListener('click', function () {
+//             displayGame();
+//         });
+//         gameType.addEventListener('change', function () {
+//             displayGame(true);
+//         });
+//         boardType.addEventListener('change', function () {
+//             document.querySelector('body').removeChild(gameZone);
+//             gameZone = undefined;
+//             if (parseInt(boardType.value) === 4) {
+//                 zoom.style.visibility = 'visible';
+//             } else {
+//                 zoom.style.visibility = 'hidden';
+//             }
+//             displayGame();
+//         });
+//         playBtn.addEventListener('click', function () {
+//             if (playBtn.innerText === 'Start') {
+//                 playBtn.innerText = 'Stop';
+//                 gameOn = true;
+//             } else {
+//                 playBtn.innerText = 'Start';
+//                 gameOn = false;
+//             }
+//         });
+//         let speed = document.createElement('input');
+//         speed.addEventListener('mousedown', function () {
+//             isDown = true;
+//         });
+//         speed.addEventListener('mouseup', function () {
+//             if (isDown === true) {
+//                 intervalTime = initIntervalTime - parseInt(speed.value) * 10;
+//                 gameOn = false;
+//                 clearInterval(interval);
+//                 play();
+//                 gameOn = true;
+//                 isDown = false;
+//             }
+//         });
+//         speed.type = 'range';
+//         speed.min = 10;
+//         speed.max = 50;
+//         speed.step = 5;
+//         speed.value = 10;
+//         speed.tile = 'speed dial';
+//         let zoom = document.createElement('input');
+//         zoom.addEventListener('mousedown', function () {
+//             isDown = true;
+//         });
+//         zoom.addEventListener('mouseup', function () {
+//             if (isDown === true) {
+//                 bGDim = parseInt(zoom.value);
+//             }
+//         });
+//         zoom.type = 'range';
+//         zoom.min = 1;
+//         zoom.max = 4;
+//         zoom.step = 1;
+//         zoom.value = 1;
+//         zoom.title = 'grid size';
+//         actionBtn.innerText = 'Next';
+//         playBtn.innerText = 'Start';
+//         mainBody.appendChild(boardType);
+//         mainBody.appendChild(gameType);
+//         mainBody.appendChild(actionBtn);
+//         mainBody.appendChild(playBtn);
+//         mainBody.appendChild(speed);
+//         mainBody.appendChild(zoom);
+//         zoom.style.visibility = 'hidden';
+//     }
 
-    return {
-        createController:createController,
-        getMain:getMain,
-        setModel:setModel,
-        setView:setView,
-        putInPage:putInPage,
-        displayGame:displayGame
-    };
-}
+//     function getMain() {
+//         return mainBody;
+//     }
 
-let gameModel = new model();
-let gameView = new view();
-let ctrl = new controller();
-ctrl.setModel(gameModel);
-ctrl.setView(gameView);
-ctrl.createController();
-ctrl.putInPage();
-ctrl.displayGame();
-// console.log(mnb.childNodes[2]);
-// console.log(mnb.children);
+//     return {
+//         createController: createController,
+//         getMain: getMain,
+//         setModel: setModel,
+//         setView: setView,
+//         putInPage: putInPage,
+//         displayGame: displayGame,
+//         play: play
+//     };
+// }
+
+// let gameModel = new model();
+// let gameView = new view();
+// let ctrl = new controller();
+// ctrl.setModel(gameModel);
+// ctrl.setView(gameView);
+// ctrl.createController();
+// ctrl.putInPage();
+// ctrl.displayGame();
+// ctrl.play();
 // mnb.childNodes[2].innerText = 'Stop';
