@@ -32,6 +32,8 @@ function controller() {
         }
         if (wasUndef === true) {
             view.createView(mainBody.childNodes[0].value);
+            model.updateMatrixSize(1);
+            mainBody.childNodes[5].value = 1;
         }
         if (wasUndef === true || redo !== undefined) {
             model.createMatrix();
@@ -143,6 +145,18 @@ function controller() {
         zoom.addEventListener('mouseup', function () {
             model.updateMatrixSize(parseInt(zoom.value));
             view.updateSize(zoom.value);
+            let matrix = model.getMatrix();
+            let selection = parseInt(boardType.options[boardType.selectedIndex].value);
+            if(selection === 1 || selection === 2){
+                console.log('updated view!');
+                document.querySelector('body').removeChild(gameZone);
+                gameZone = undefined;
+                gameZone = document.createElement('div');
+                gameZone.style.width = '500px';
+                gameZone.style.height = '500px';
+                document.querySelector('body').appendChild(gameZone);
+                gameZone.appendChild(view.getView());
+            }
             displayGame();
         });
         zoom.type = 'range';

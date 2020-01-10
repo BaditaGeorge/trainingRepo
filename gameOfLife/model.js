@@ -28,7 +28,6 @@ function model() {
 
     function expand(zoomed){
         let tMatrix = copyMatrix(matrix);
-        console.log(tMatrix.length);
         matrix = [];
         for(let i=0;i<nr_Rows*zoomed;i++){
             matrix.push([]);
@@ -49,11 +48,14 @@ function model() {
     function resize(zoomed){
         let tMatrix = copyMatrix(matrix);
         matrix = [];
-        for(let i=(nr_Rows*zoom - nr_Rows*zoomed)/2;i<((nr_Rows*zoom - nr_Rows*zoomed)/2 + nr_Rows*zoom);i++){
+        //index of resized matrix that we're constructing 
+        let index = 0;
+        for(let i=(nr_Rows*zoom - nr_Rows*zoomed)/2;i<((nr_Rows*zoom - nr_Rows*zoomed)/2 + nr_Rows*zoomed);i++){
             matrix.push([]);
-            for(let j=(nr_Cols*zoom - nr_Cols*zoomed)/2;j<((nr_Cols*zoom - nr_Cols*zoomed)/2 + nr_Cols*zoom);j++){
-                matrix[i].push(tMatrix[i][j]);
+            for(let j=(nr_Cols*zoom - nr_Cols*zoomed)/2;j<((nr_Cols*zoom - nr_Cols*zoomed)/2 + nr_Cols*zoomed);j++){
+                matrix[index].push(tMatrix[i][j]);
             }
+            index++;
         }
         zoom = zoomed;
     }
@@ -62,7 +64,7 @@ function model() {
     function updateMatrixSize(zoomed){
         if(zoomed > zoom){
             expand(zoomed);
-        }else{
+        }else if(zoomed < zoom){
             resize(zoomed);
         }
     }
@@ -127,7 +129,7 @@ function model() {
         let dirY = [0, 0, -1, 1, 1, -1, 1, -1];
         let neighbors = 0;
         for (let i = 0; i < dirX.length; i++) {
-            if (x + dirX[i] >= 0 && y + dirY[i] >= 0 && x + dirX[i] < nr_Rows && y + dirY[i] < nr_Cols) {
+            if (x + dirX[i] >= 0 && y + dirY[i] >= 0 && x + dirX[i] < nr_Rows*zoom && y + dirY[i] < nr_Cols*zoom) {
                 if (matrix[x + dirX[i]][y + dirY[i]] === 1) {
                     neighbors++;
                 }

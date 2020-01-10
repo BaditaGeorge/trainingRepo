@@ -24,12 +24,16 @@ function TextView(){
 
     function updateSize(zoomed){
         if(zoomed === 1){
+            gameView = document.createElement('p');
             gameView.style.fontSize = '11px';
         }else if(zoomed === 2){
+            gameView = document.createElement('p');
             gameView.style.fontSize = '5px';
         }else if(zoomed === 3){
+            gameView = document.createElement('p');
             gameView.style.fontSize = '2px';
         }else if(zoomed === 4){
+            gameView = document.createElement('p');
             gameView.style.fontSize = '1px';
         }
     }
