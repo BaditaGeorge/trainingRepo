@@ -7,7 +7,6 @@ function controller() {
     let intervalTime = 500;
     let initIntervalTime = 500;
     let interval;
-    let bGDim = 1;
     function setModel(mainModel) {
         model = mainModel;
     }
@@ -106,11 +105,6 @@ function controller() {
         boardType.addEventListener('change', function () {
             document.querySelector('body').removeChild(gameZone);
             gameZone = undefined;
-            if (parseInt(boardType.value) === 4) {
-                zoom.style.visibility = 'visible';
-            } else {
-                zoom.style.visibility = 'hidden';
-            }
             displayGame();
         });
         playBtn.addEventListener('click', function () {
@@ -147,9 +141,9 @@ function controller() {
             isDown = true;
         });
         zoom.addEventListener('mouseup', function () {
-            if (isDown === true) {
-                bGDim = parseInt(zoom.value);
-            }
+            model.updateMatrixSize(parseInt(zoom.value));
+            view.updateSize(zoom.value);
+            displayGame();
         });
         zoom.type = 'range';
         zoom.min = 1;
@@ -165,7 +159,6 @@ function controller() {
         mainBody.appendChild(playBtn);
         mainBody.appendChild(speed);
         mainBody.appendChild(zoom);
-        zoom.style.visibility = 'hidden';
     }
 
     function getMain() {

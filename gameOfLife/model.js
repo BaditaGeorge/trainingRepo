@@ -2,26 +2,70 @@ function model() {
     let matrix = [];
     let nr_Rows = 50;
     let nr_Cols = 50;
+    let zoom = 1;
     //here i create the matrix that will serve as the model for the animation
     function createMatrix() {
         matrix = [];
-        for (let i = 0; i < nr_Rows; i++) {
+        for (let i = 0; i < nr_Rows*zoom; i++) {
             matrix.push([]);
-            for (let j = 0; j < nr_Cols; j++) {
+            for (let j = 0; j < nr_Cols*zoom; j++) {
                 matrix[i].push(0);
             }
         }
     }
 
-    // function updateMatrixSize(zoomed){
-    //     let tMatrix = matrix;
-    //     if(zoomed)
-    //     for(let i=0;i<nr_Rows*zoomed;i++){
-    //         for(let j=0;j<nr_Cols*zoomed;j++){
-    //             if(j>=25;j<=)
-    //         }
-    //     }
-    // }
+    function copyMatrix(matrix){
+        let new_matrix = [];
+        for(let i=0;i<matrix.length;i++){
+            new_matrix.push([]);
+            for(let j=0;j<matrix[i].length;j++){
+                new_matrix[i].push(matrix[i][j]);
+            }
+        }
+        return new_matrix;
+    }
+
+
+    function expand(zoomed){
+        let tMatrix = copyMatrix(matrix);
+        console.log(tMatrix.length);
+        matrix = [];
+        for(let i=0;i<nr_Rows*zoomed;i++){
+            matrix.push([]);
+            for(let j=0;j<nr_Cols*zoomed;j++){
+                if(i>=(nr_Rows*zoomed - nr_Rows*zoom)/2 && 
+                i < ((nr_Rows*zoomed - nr_Rows*zoom)/2 + nr_Rows*zoom) &&
+                j>=(nr_Cols*zoomed - nr_Cols*zoom)/2 &&
+                j < ((nr_Cols*zoomed - nr_Cols*zoom)/2 + nr_Cols*zoom)){
+                    matrix[i].push(tMatrix[i-(nr_Rows*zoomed - nr_Rows*zoom)/2][j-(nr_Cols*zoomed - nr_Cols*zoom)/2])
+                }else{
+                    matrix[i].push(0);
+                }
+            }
+        }
+        zoom = zoomed;
+    }
+
+    function resize(zoomed){
+        let tMatrix = copyMatrix(matrix);
+        matrix = [];
+        for(let i=(nr_Rows*zoom - nr_Rows*zoomed)/2;i<((nr_Rows*zoom - nr_Rows*zoomed)/2 + nr_Rows*zoom);i++){
+            matrix.push([]);
+            for(let j=(nr_Cols*zoom - nr_Cols*zoomed)/2;j<((nr_Cols*zoom - nr_Cols*zoomed)/2 + nr_Cols*zoom);j++){
+                matrix[i].push(tMatrix[i][j]);
+            }
+        }
+        zoom = zoomed;
+    }
+
+
+    function updateMatrixSize(zoomed){
+        if(zoomed > zoom){
+            expand(zoomed);
+        }else{
+            resize(zoomed);
+        }
+    }
 
     //here i draw a specific form on the table, form varies by user's option
     //basically, i mark with 1 celss which are component of the initial form
@@ -96,8 +140,8 @@ function model() {
     //living cells are cells marked with 1
     function getLivingCells() {
         let livings = [];
-        for (let i = 0; i < nr_Rows; i++) {
-            for (let j = 0; j < nr_Cols; j++) {
+        for (let i = 0; i < nr_Rows * zoom; i++) {
+            for (let j = 0; j < nr_Cols * zoom; j++) {
                 if (matrix[i][j] === 1) {
                     livings.push([i, j]);
                 }
@@ -111,8 +155,8 @@ function model() {
     function playGame() {
         let toAdd = [];
         let toRem = [];
-        for (let i = 0; i < nr_Rows; i++) {
-            for (let j = 0; j < nr_Cols; j++) {
+        for (let i = 0; i < nr_Rows * zoom; i++) {
+            for (let j = 0; j < nr_Cols * zoom; j++) {
                 let neighbors = countNeighbors(i, j);
                 //no neighbor, cell dies
                 if (neighbors <= 1) {
@@ -147,6 +191,7 @@ function model() {
         createMatrix: createMatrix,
         drawModel: drawModel,
         playGame: playGame,
-        getMatrix: getMatrix
+        getMatrix: getMatrix,
+        updateMatrixSize:updateMatrixSize
     };
 }
