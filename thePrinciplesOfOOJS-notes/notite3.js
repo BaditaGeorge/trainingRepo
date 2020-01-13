@@ -68,6 +68,8 @@ function Person(name){
     this.name = name;
 }
 
+//https://learning.oreilly.com/library/view/the-principles-of/9781457185304/ch06.html
+
 // Person.prototype = Object.create(EventTarget.prototype);
 // Person.prototype.constructor = Person;
 
