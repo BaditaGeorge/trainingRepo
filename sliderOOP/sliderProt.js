@@ -1,62 +1,65 @@
-class EventManager {
-    constructor() {
-    }
 
-    addListener(type, listener) {
-        if (!this.hasOwnProperty("_listeners")) {
-            this._listeners = [];
-        }
+function EventManager(){
 
-        if (typeof this._listeners[type] === "undefined") {
-            this._listeners[type] = [];
-        }
+}
 
-        this._listeners[type].push(listener);
-    }
+EventManager.prototype = {
+    constructor:EventManager,
 
-    fire(event) {
-        if (!event.target) {
-            event.target = this;
-        }
-
-        if (!event.type) {
-            throw new Error("Event object missing 'type' property.");
-        }
-
-        if (this._listeners && this._listeners[event.type] instanceof Array) {
-            let listeners = this._listeners[event.type];
-            for (let i = 0, len = listeners.length; i < len; i++) {
-                listeners[i].call(this, event.data);
+    functions:{
+        addListener:function(type,listener){
+            if(!this.hasOwnProperty("_listeners")){
+                this._listeners = [];
             }
-        }
-    }
 
-    removeListener(type, listener) {
-        if (this._listeners && this._listeners[type] instanceof Array) {
-            let listeners = this._listeners[type];
-            for (let i = 0, len = listeners.length; i < len; i++) {
-                if (listeners[i] === listener) {
-                    listeners.splice(i, 1);
-                    break;
+            if(typeof this._listeners[type] == "undefined"){
+                this._listeners[type] = [];
+            }
+
+            this._listeners[type].push(listener);
+        },
+
+        fire:function(event){
+
+            if(!event.target){
+                event.target = this;
+            }
+
+            if(!event.type){
+                throw new Error("Event object missing 'type' property.");
+            }
+            
+            if(this._listeners && this._listeners[event.type] instanceof Array){
+                let listeners = this._listeners[event.type];
+                for(let i=0,len=listeners.length;i < len;i++){
+                    listeners[i].call(this,event.data);
+                }
+            }
+        },
+
+        removeListener:function(type,listener){
+            if(this._listeners && this._listeners[type] instanceof Array){
+                let listeners = this._listeners[type];
+                for(let i=0,len=listeners.length;i<len;i++){
+                    if(listeners[i] === listener){
+                        listeners.splice(i,1);
+                        break;
+                    }
                 }
             }
         }
     }
 }
 
-class Slider extends EventManager {
-    constructor(options) {
-        super();
-        this.cssClass = options.cssClass
-        this.min = options.min;
-        this.max = options.max;
-        this.width = options.width;
-    }
+function Slider(options){
+    
+    this.cssClass = options.cssClass
+    this.min = options.min;
+    this.max = options.max;
+    this.width = options.width;
 
-    setAttributes(){
+    this.setAttributes = function(){
         let superThis = this;
-        let targ;
-        let isdown = false;
         let mouseUpFunction = function(){
             this.isDown = false;
         }
@@ -99,7 +102,7 @@ class Slider extends EventManager {
         });
     }
 
-    createElement() {
+    this.createElement = function(){
         this.clasList = [];
         this.slider = document.createElement('div');
         this.slider.style.width = this.width + 'px';
@@ -119,7 +122,7 @@ class Slider extends EventManager {
         return this.slider;
     }
 
-    modifySlider() {
+    this.modifySlider = function(){
         if (this.slider !== undefined) {
             this.slider.style.width = this.width + 'px';
             this.slidingSquare.style.left = this.width + 'px';
@@ -127,44 +130,44 @@ class Slider extends EventManager {
         this.label.innerText = 'Value: ' + this.max;
     }
 
-    boundToParent(parent) {
+    this.boundToParent = function(parent){
         if ((parent instanceof HTMLElement) === true) {
             parent.appendChild(this.createElement());
             parent.appendChild(this.label);
         }
     }
 
-    setMin(min) {
+    this.setMin = function(min){
         this.min = min;
         this.modifySlider();
     }
 
-    setMax(max) {
+    this.setMax = function(max){
         this.max = max;
         this.modifySlider();
     }
 
-    setWidth(width) {
+    this.setWidth = function(width){
         this.width = width;
         this.modifySlider();
     }
 
-    getMin() {
+    this.getMin = function() {
         return this.min;
     }
 
-    getMax() {
+    this.getMax = function() {
         return this.max;
     }
 
-    getWidth() {
+    this.getWidth = function() {
         return this.width;
     }
 
-    addEvent(parent, type) {
+    this.addEvent = function(parent, type) {
         let callFire = () => {
-            super.fire({
-                type: 'mouseup',
+            this.fire({
+                type: type,
                 data: this.slider
             });
         };
@@ -173,7 +176,7 @@ class Slider extends EventManager {
         });
     }
 
-    setClass(className) {
+    this.setClass = function(className) {
         if(this.cssClass !== undefined){
             this.slider.classList.remove(this.cssClass);
         }
@@ -182,16 +185,19 @@ class Slider extends EventManager {
         this.cssClass = className;
     }
 }
+
+
+Slider.prototype = EventManager.prototype.functions;
+Slider.prototype.constructor = Slider;
 let cnt = document.getElementById('cont');
-let sl = new Slider({min:-1000, max:2000, width:1000});
-sl.boundToParent(cnt);
-//sl.setClass('slider');
-sl.addListener('mouseup', (slider) => {
+let a = new Slider({min:1000,max:1000,width:1000});
+a.boundToParent(cnt);
+a.setWidth(500);
+a.setMax(2000);
+a.addListener('click',function(slider){
     console.log(slider.style.width);
 });
-sl.addEvent(cnt, 'mouseup');
+a.addEvent(cnt,'click');
+// a.fire({type:'ms',data:'Data'});
+// a.speak();
 
-sl.setMin(0);
-sl.setMax(3000);
-sl.setWidth(500);
-//sl.setClass('slider');
