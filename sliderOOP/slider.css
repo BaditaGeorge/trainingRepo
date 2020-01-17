@@ -6,4 +6,8 @@
   .slider:hover {
     opacity: 1;
   }
+
+  .square{
+    border-radius:50%;
+  }
   

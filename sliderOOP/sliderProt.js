@@ -79,11 +79,13 @@ function Slider(options){
                 tempFunction(e);
             });
         }
+
         let mouseMoveFunction = function(e){
             if(this.isDown === true){
                 if(this.target === this.slider || this.target === this.slidingSquare){
-                    if(parseInt(this.slidingSquare.style.left) < parseInt(this.slider.style.width) + (parseInt(this.slidingSquare.style.width)/2) &&
-                    parseInt(this.slidingSquare.style.left) > parseInt((this.slidingSquare.style.width))){
+                    let leftFromCorner = parseInt(this.slider.getBoundingClientRect().left);
+                    if(parseInt(e.clientX) < parseInt(this.slider.style.width) + leftFromCorner && 
+                    parseInt(e.clientX) > leftFromCorner){
                         this.step = (this.max - this.min)/this.width;
                         this.slidingSquare.style.left = e.clientX - (parseInt(this.slidingSquare.style.width)/2) + 'px';
                         this.label.innerText = 'Value: ' + parseInt(this.max - (parseInt(this.slider.style.width) - parseInt(this.slidingSquare.style.left))*this.step);
@@ -91,6 +93,7 @@ function Slider(options){
                 }
             }
         }
+
         document.addEventListener('mouseup',function(e){
             mouseUpFunction.call(superThis);
         });
@@ -176,7 +179,7 @@ function Slider(options){
         });
     }
 
-    this.setClass = function(className) {
+    this.setSliderClass = function(className) {
         if(this.cssClass !== undefined){
             this.slider.classList.remove(this.cssClass);
         }
@@ -184,11 +187,18 @@ function Slider(options){
         console.log(this.slider);
         this.cssClass = className;
     }
+
+    this.setSliderSquareClass = function(className){
+        if(this.squareCssClass !== undefined){
+            this.squareCssClass.classList.remove(this.squareCssClass);
+        }
+        this.slidingSquare.classList.add(className);
+    }
 }
 
 
 Slider.prototype = EventManager.prototype.functions;
-Slider.prototype.constructor = Slider;
+// Slider.prototype.constructor = Slider;
 let cnt = document.getElementById('cont');
 let a = new Slider({min:1000,max:1000,width:1000});
 a.boundToParent(cnt);
@@ -198,6 +208,8 @@ a.addListener('click',function(slider){
     console.log(slider.style.width);
 });
 a.addEvent(cnt,'click');
+// a.setSliderClass('slider');
+// a.setSliderSquareClass('square');
 // a.fire({type:'ms',data:'Data'});
 // a.speak();
 
