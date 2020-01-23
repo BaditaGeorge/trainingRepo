@@ -66,10 +66,11 @@ function Slider(options){
         let mouseDownFunction = function(e){
             this.target = e.target;
             if(this.target === this.slider || this.target === this.slidingSquare){
+                this.step = ((this.max - this.min))/this.width;
                 this.slidingSquare.style.left = e.clientX - (parseInt(this.slidingSquare.style.width)/2) + 'px';
+                this.label.innerText = 'Value: ' + parseInt(this.max - (parseInt(this.slider.style.width) - parseInt(this.slidingSquare.style.left))*this.step);
             }
             this.isDown = true;
-            console.log(this.isDown);
         }
         this.label = document.createElement('p');
         this.label.innerText = 'Value: ' + this.max;
@@ -84,10 +85,12 @@ function Slider(options){
             if(this.isDown === true){
                 if(this.target === this.slider || this.target === this.slidingSquare){
                     let leftFromCorner = parseInt(this.slider.getBoundingClientRect().left);
-                    if(parseInt(e.clientX) < parseInt(this.slider.style.width) + leftFromCorner && 
-                    parseInt(e.clientX) > leftFromCorner){
-                        this.step = (this.max - this.min)/this.width;
+                    if(parseInt(e.clientX) < parseInt(this.slider.style.width) + 6 && 
+                    parseInt(e.clientX) > leftFromCorner - 4){
+                        //compute the step, basically, i just divide by width the difference between max and min(values set by the user)
+                        this.step = ((this.max - this.min))/this.width;
                         this.slidingSquare.style.left = e.clientX - (parseInt(this.slidingSquare.style.width)/2) + 'px';
+                        //compute the value for the label, it's gonna be distance between right end and current position of the sliding square, multiplied with step
                         this.label.innerText = 'Value: ' + parseInt(this.max - (parseInt(this.slider.style.width) - parseInt(this.slidingSquare.style.left))*this.step);
                     }
                 }

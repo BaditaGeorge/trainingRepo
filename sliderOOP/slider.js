@@ -63,10 +63,11 @@ class Slider extends EventManager {
         let mouseDownFunction = function(e){
             this.target = e.target;
             if(this.target === this.slider || this.target === this.slidingSquare){
+                this.step = ((this.max - this.min))/this.width;
                 this.slidingSquare.style.left = e.clientX - (parseInt(this.slidingSquare.style.width)/2) + 'px';
+                this.label.innerText = 'Value: ' + parseInt(this.max - (parseInt(this.slider.style.width) - parseInt(this.slidingSquare.style.left))*this.step);
             }
             this.isDown = true;
-            console.log(this.isDown);
         }
         this.label = document.createElement('p');
         this.label.innerText = 'Value: ' + this.max;
@@ -81,10 +82,12 @@ class Slider extends EventManager {
             if(this.isDown === true){
                 if(this.target === this.slider || this.target === this.slidingSquare){
                     let leftFromCorner = parseInt(this.slider.getBoundingClientRect().left);
-                    if(parseInt(e.clientX) < parseInt(this.slider.style.width) && 
-                    parseInt(e.clientX) > leftFromCorner){
-                        this.step = ((this.max - this.min) - parseInt(this.slidingSquare.style.width))/this.width;
+                    if(parseInt(e.clientX) < parseInt(this.slider.style.width) + 6 && 
+                    parseInt(e.clientX) > leftFromCorner - 4){
+                        //compute the step, basically, i just divide by width the difference between max and min(values set by the user)
+                        this.step = ((this.max - this.min))/this.width;
                         this.slidingSquare.style.left = e.clientX - (parseInt(this.slidingSquare.style.width)/2) + 'px';
+                        //compute the value for the label, it's gonna be distance between right end and current position of the sliding square, multiplied with step
                         this.label.innerText = 'Value: ' + parseInt(this.max - (parseInt(this.slider.style.width) - parseInt(this.slidingSquare.style.left))*this.step);
                     }
                 }
@@ -182,7 +185,6 @@ class Slider extends EventManager {
             this.slider.classList.remove(this.cssClass);
         }
         this.slider.classList.add(className);
-        console.log(this.slider);
         this.cssClass = className;
     }
 
@@ -206,6 +208,8 @@ sl.setMin(0);
 sl.setMax(3000);
 sl.setWidth(500);
 sl.setWidth(1000);
+let a = new Slider({min:-500,max:2000,width:1000});
+a.boundToParent(cnt);
 // sl.setSliderClass('slider');
 // sl.setSliderSquareClass('square');
 //sl.setClass('slider');
