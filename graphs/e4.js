@@ -31,8 +31,8 @@ div.appendChild(svg);
 // let arc = describeArc(100,100,100,0,270);
 d = [
     'M',0,0,
-    'L',0,50,
-    'L',50,50,
+    'L',0,100,
+    'L',50,100,
     'L',50,0
 ].join(' ');
 pth.setAttribute('d',d);
