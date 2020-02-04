@@ -1,0 +1,9 @@
+#progress circle {
+    animation: do-progress 4s infinite;
+}
+  
+@keyframes do-progress {
+      0% { stroke-dashoffset: 0px; }
+     50% { stroke-dashoffset: -146px; }
+    100% { stroke-dashoffset: 0px; }
+}

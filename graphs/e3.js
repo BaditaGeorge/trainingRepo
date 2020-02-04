@@ -18,9 +18,10 @@
   
       var d = [
           "M", start.x, start.y, 
-          "A", radius, radius, 0, arcSweep, 0, end.x, end.y,
-          "L", x,y,
-          "L", start.x, start.y,
+          "A", radius-50, radius-50, 0, 0, 0, end.x, end.y,
+          "L",start.x,start.y,
+          "A",radius,radius,0,0,0,end.x,end.y,
+          // "L", start.x, start.y,
       ].join(" ");
       
       //console.log(d);
@@ -36,11 +37,13 @@
   
   // document.getElementById("arc1").setAttribute("d", arc);
   let svgEl = document.createElementNS('http://www.w3.org/2000/svg','svg');
-  svgEl.setAttribute('width',200);
-  svgEl.setAttribute('height','' + 200);
+  svgEl.setAttribute('width',500);
+  svgEl.setAttribute('height','' + 500);
   let pth = document.createElementNS('http://www.w3.org/2000/svg','path');
   pth.setAttribute('d',arc);
+  // pth.setAttribute('stroke','green');
   pth.setAttribute('fill','indigo');
+  // pth.setAttribute('stroke-width','10');
   svgEl.appendChild(pth);
   document.body.appendChild(svgEl);
   //document.getElementById("path").innerHTML = arc;
