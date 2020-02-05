@@ -6,6 +6,10 @@ function Graphs(){
         throw "Draw function not overwritten!";
     }
 
+    this.setConfiguration = function(config){
+        throw "setConfiguration not overwritten!";
+    }
+
     this.loadData = function(object){
         let cols = ['blue','red','purple','green','cyan','orange','yellow','violet','black','grey','coral','aquamarine','chartreuse','darkblue','indigo','mistyrose'];
         let keys = object['data'].length;
@@ -16,16 +20,24 @@ function Graphs(){
     }
 }
 
-let a = new Graphs();
-a.loadData({data:[{label:'Paramount',percent:10},{label:'Universal',percent:25},{label:'Disney',percent:45},{label:'Fox',percent:10},{label:'WB',percent:5},{label:'A24',percent:5}]});
+let testObj = {data:[{label:'Paramount',percent:10},{label:'Universal',percent:25},{label:'Disney',percent:45},{label:'Fox',percent:10},{label:'WB',percent:5},{label:'A24',percent:5}]};
+// let a = new Graphs();
+// a.loadData({data:[{label:'Paramount',percent:10},{label:'Universal',percent:25},{label:'Disney',percent:45},{label:'Fox',percent:10},{label:'WB',percent:5},{label:'A24',percent:5}]});
 
 // Pie Chart
 function PieChart(){
 
 }
-PieChart.prototype = a;
-drawCircle = function(centerX,centerY,radius){
+PieChart.prototype = new Graphs();
+PieChart.prototype.elements = [];
+drawCircle = function(){
     //adjust ul este un numar cu care adun valoare in radieni a unghiului(angleInDegrees), pentru a putea sa mut spre stanga cu cat e este nevoie portiunea de cerc desenata
+    if(this.cX === undefined || this.cY === undefined || this.r === undefined){
+        throw "Can't draw chart with undefined value!";
+    }
+    let centerX = this.cX;
+    let centerY = this.cY;
+    let radius = this.r;
     let colors = {'red':0,'blue':0,'purple':0,'black':0,'cyan':0};
     function polarToCartesian(centerX,centerY,radius,angleInDegrees,adjust){
         let angleInRadians = (angleInDegrees + adjust) * Math.PI / 180.0;
@@ -34,6 +46,7 @@ drawCircle = function(centerX,centerY,radius){
             y: centerY + (radius * Math.sin(angleInRadians))
         };
     }
+    let i = 0;
     function createLabel(mij,percent){
         let txt = document.createElementNS('http://www.w3.org/2000/svg','text');
         let mijX = (centerX + mij.x)/2;
@@ -44,6 +57,43 @@ drawCircle = function(centerX,centerY,radius){
         txt.textContent = percent+'%';
         return txt;
     }
+
+    let superThis = this;
+    function eventOver(e){
+        // console.log(superThis.elements[0]);
+        for(let el of superThis.elements){
+            if(el[0] === e.target){
+                superThis.element = el;
+                document.body.addEventListener('mousemove',eventMove);
+                el[0].addEventListener('mouseleave',eventLeave);
+                superThis.originalX = el[1].getAttribute('x');
+                superThis.originalY = el[1].getAttribute('y');
+                // console.log(el[1].getAttribute('x'),el[1].getAttribute('y'),e.clientX,e.clientY);
+                break;
+            }
+        }
+    }
+
+    function eventMove(e){
+        // console.log(this.isOver);
+        // console.log('move');
+        superThis.element[1].setAttribute('x',e.clientX+10);
+        superThis.element[1].setAttribute('y',e.clientY);
+    }
+
+    function eventLeave(e){
+        // console.log(superThis.element);
+        superThis.element[0].removeEventListener('mouseleave',eventLeave);
+        superThis.element[1].setAttribute('x',superThis.originalX);
+        superThis.element[1].setAttribute('y',superThis.originalY);
+        superThis.originalX = undefined;
+        superThis.originalY = undefined;
+        superThis.element = undefined;
+        document.body.removeEventListener('mousemove',eventMove);
+        // this.isOver = false;
+        // console.log(this.isOver);
+    }
+
     //asta este echivalentul ca si grade a 1% pe grafic
     let smallestPerc = 3.599;
     let svgBox = document.createElementNS('http://www.w3.org/2000/svg','svg');
@@ -65,25 +115,39 @@ drawCircle = function(centerX,centerY,radius){
         ].join(" ");
         pth.setAttribute("d",arcPth);
         pth.setAttribute("fill",this.colors[i]);
+        let label = createLabel(mij,this.data[i].percent)
+        this.elements.push([pth,label]);
         svgBox.appendChild(pth);
-        svgBox.appendChild(createLabel(mij,this.data[i].percent));
+        svgBox.appendChild(label);
     }
+    document.body.addEventListener('mouseover',eventOver);
     return svgBox;
 }
+
 PieChart.prototype.draw = drawCircle;
-// console.log(a.colors);
-// console.log(a.data);
-// let el = new PieChart();
-// console.log(el.colors);
-// console.log(el.data);
-// document.body.appendChild(el.draw(200,200,200));
+PieChart.prototype.setConfiguration = function(config){
+    this.cX = config['cX'];
+    this.cY = config['cY'];
+    this.r = config['r'];
+}
 
 //Nail Chart
 function NailChart(){
 
 }
-NailChart.prototype = a;
-NailChart.prototype.draw = function(orientation,w,h){
+NailChart.prototype = new Graphs();
+NailChart.prototype.setConfiguration = function(config){
+    this.orientation = config['orientation'];
+    this.w = config['w'];
+    this.h = config['h'];
+}
+NailChart.prototype.draw = function(){
+    if(this.orientation === undefined || this.w === undefined || this.h === undefined){
+        throw "Can't draw with undefined values!";
+    }
+    let orientation = this.orientation;
+    let w = this.w;
+    let h = this.h;
     let svgBox = document.createElementNS('http://www.w3.org/2000/svg','svg');
     function producePath(percent,lastPosition){
         if(orientation === 'horizontal'){
@@ -143,29 +207,74 @@ NailChart.prototype.draw = function(orientation,w,h){
     }
     return svgBox;
 }
-let el = new NailChart();
-// console.log(el.data);
-// console.log(el.colors);
-// console.log(el.draw('vertical',100,200));
-// document.body.appendChild(el.draw('horizontal',600,100));
-document.body.appendChild(el.draw('vertical',100,500));
+
 //Legend, also somekind of chart or diagram
 function Legend(){
 
 }
-Legend.prototype = a;
+Legend.prototype = new Graphs();
+Legend.prototype.setConfiguration = function(obj){
+    console.log('It is not necessarly to offer a config object for Legend!');
+}
 Legend.prototype.draw = function(){
-
+    let svgBox = document.createElementNS('http://www.w3.org/2000/svg','svg');
+    svgBox.setAttribute('width',400);
+    svgBox.setAttribute('height',1200);
+    //rectangle fixed dimension
+    let length = 20;
+    let width = 12;
+    let padding = 4; //distanta dintre dreptunghiuri
+    function createRectangle(lastPosition){
+        return [
+            "M",0,lastPosition,
+            "L",length,lastPosition,
+            "L",length,lastPosition + width,
+            "L",0,lastPosition + width,
+            "L",0,lastPosition,
+        ].join(" ");
+    }
+    let initialPosition = 0;
+    for(let i=0;i<this.data.length;i++){
+        let svgPth = document.createElementNS('http://www.w3.org/2000/svg','path');
+        let svgTxt = document.createElementNS('http://www.w3.org/2000/svg','text');
+        console.log(createRectangle(initialPosition));
+        svgPth.setAttribute('d',createRectangle(initialPosition));
+        svgPth.setAttribute('fill',this.colors[i]);
+        initialPosition += (width + padding);
+        svgTxt.setAttribute('x',length + padding);
+        svgTxt.setAttribute('y',initialPosition - padding);
+        svgTxt.textContent = this.data[i].label;
+        svgBox.appendChild(svgPth);
+        svgBox.appendChild(svgTxt);
+    }
+    return svgBox;
 }
 
 //Donut Chart
 function DonutChart(){
-
+    
 }
-DonutChart.prototype = a;
-DonutChart.prototype.draw = function(centerX,centerY,radius){
+DonutChart.prototype = new Graphs();
+DonutChart.prototype.setConfiguration = function(config){
+    this.cX = config['cX'];
+    this.cY = config['cY'];
+    this.r = config['r'];
+    this.hr = config['holeRadius'];
+    if(this.hr >= this.r){
+        throw "Hole radius cannot be bigger than chart radius!";
+    }
+}
+DonutChart.prototype.elements = [];
+DonutChart.prototype.draw = function(){
     //adjust ul este un numar cu care adun valoare in radieni a unghiului(angleInDegrees), pentru a putea sa mut spre stanga cu cat e este nevoie portiunea de cerc desenata
-    let colors = {'red':0,'blue':0,'purple':0,'black':0,'cyan':0};
+    if(this.cX === undefined || this.cY === undefined || this.r === undefined || this.hr === undefined){
+        throw "Can't draw with undefined value!";
+    }
+    let centerX = this.cX;
+    let centerY = this.cY;
+    let radius = this.r;
+    let holeRadius = this.hr;
+    
     function polarToCartesian(centerX,centerY,radius,angleInDegrees,adjust){
         let angleInRadians = (angleInDegrees + adjust) * Math.PI / 180.0;
         return {
@@ -173,15 +282,45 @@ DonutChart.prototype.draw = function(centerX,centerY,radius){
             y: centerY + (radius * Math.sin(angleInRadians))
         };
     }
-    // function doHole(){
-    //     let end = polarToCartesian(centerX,centerY,radius/1.2,0,0);
-    //     let start = polarToCartesian(centerX,centerY,radius/1.2,359.9,0);
-    //     return [
-    //         "M",start.x,start.y,
-    //         "A",radius/1.2,radius/1.2,0,"1",0,end.x,end.y,
+
+    let superThis = this;
+    function eventOver(e){
+        for(let el of superThis.elements){
+            if(e.target === el[0]){
+                superThis.txt = document.createElementNS('http://www.w3.org/2000/svg','text');
+                let textToAdd = el[1].label + '' + el[1].percent;
+                superThis.txt.setAttribute('x',superThis.cX - textToAdd.length*3);
+                superThis.txt.setAttribute('y',superThis.cY);
+                superThis.txt.textContent = textToAdd;
+                superThis.txt.setAttribute('font-size',20);
+                superThis.innerCircle.appendChild(superThis.txt);
+                superThis.element = el[0];
+                superThis.element.addEventListener('mouseleave',eventLeave);
+                break;
+            }
+        }
+    }
+
+    function eventLeave(e){
+        superThis.innerCircle.removeChild(superThis.txt);
+        superThis.txt = undefined;
+        superThis.element.removeEventListener('mouseleave',eventLeave);
+        superThis.element = undefined;
+    }
+
+    // function createInnerCircle(centerX,centerY,radius){
+    //     let st = polarToCartesian(centerX,centerY,radius,359.9,0);
+    //     let end = polarToCartesian(centerX,centerY,radius,0,0);
+    //     let svgPth = document.createElementNS('http://www.w3.org/2000/svg','path');
+    //     let d = [
+    //         "M",st.x,st.y,
+    //         "A",radius,radius,0,1,0,end.x,end.y,
     //         "L",centerX,centerY,
-    //         "L",start.x,start.y,
+    //         "L",st.x,st.y,
     //     ].join(" ");
+    //     svgPth.setAttribute('d',d);
+    //     svgPth.setAttribute('fill','white');
+    //     return svgPth;
     // }
     //asta este echivalentul ca si grade a 1% pe grafic
     let smallestPerc = 3.599;
@@ -189,37 +328,70 @@ DonutChart.prototype.draw = function(centerX,centerY,radius){
     svgBox.setAttribute('width',radius*2);
     svgBox.setAttribute('height',radius*2);
     let initialAdjust = 0;
-    // console.log(this.data);
+
     for(let i=0;i<this.data.length;i++){
         let pth = document.createElementNS('http://www.w3.org/2000/svg','path');
-        // console.log(this.data[i].percent,this.data[i].percent*smallestPerc);
         let end = polarToCartesian(centerX,centerY,radius,0,initialAdjust);
         let start = polarToCartesian(centerX,centerY,radius,this.data[i].percent*smallestPerc,initialAdjust);
+        let midEnd = polarToCartesian(centerX,centerY,holeRadius,0,initialAdjust);
+        let midStart = polarToCartesian(centerX,centerY,holeRadius,this.data[i].percent*smallestPerc,initialAdjust);
         initialAdjust += this.data[i].percent*smallestPerc;
         let arcSweep = (this.data[i].percent*smallestPerc - 0 <= 180) ? "0" : "1"; 
         let arcPth = [
             "M",start.x,start.y,
             "A",radius,radius,0,arcSweep,0,end.x,end.y,
-            "L",end.x,end.y,
-            "L",centerX,centerY,
-            // "M",centerX-50,centerY+100,
-            // "L",centerX-30,centerY+100,
-            // "M",start.x,start.y,
+            "L",midEnd.x,midEnd.y,
+            "A",holeRadius,holeRadius,0,arcSweep,1,midStart.x,midStart.y,
+            "L",start.x,start.y,
         ].join(" ");
         pth.setAttribute("d",arcPth);
         pth.setAttribute("fill",this.colors[i]);
-        // pth.setAttribute("text","text");
+        this.elements.push([pth,this.data[i],this.colors[i]]);
         svgBox.appendChild(pth);
     }
-    let hole = document.createElementNS('http://www.w3.org/2000/svg','path');
-    // hole.setAttribute('d',doHole());
-    // hole.setAttribute('fill','white');
-    // svgBox.appendChild(hole);
-    // console.log(doHole());
+    // let hole = document.createElementNS('http://www.w3.org/2000/svg','path');
+    // this.innerCircle = createInnerCircle(centerX,centerY,holeRadius);
+    // svgBox.appendChild(this.innerCircle);
+    document.body.addEventListener('mouseover',eventOver);
+    this.innerCircle = svgBox;
     return svgBox;
 } 
 
-// let el = new DonutChart();
-// console.log(el.colors);
-// console.log(el.data);
-// document.body.appendChild(el.draw(200,200,200));
+function GraphFactory(type){
+    if(type === 'PieChart'){
+        return new PieChart();
+    }else if(type === 'DonutChart'){
+        return new DonutChart();
+    }else if(type === 'NailChart'){
+        return new NailChart();
+    }else if(type === 'Legend'){
+        return new Legend();
+    }else{
+        return undefined;
+    }
+}
+let el;
+//DONUT
+// el = new DonutChart();
+// el.loadData(testObj);
+// el.setConfiguration({cX:200,cY:200,r:200});
+// document.body.appendChild(el.draw());
+
+
+//PIE
+el = new GraphFactory('DonutChart');
+el.loadData(testObj);
+el.setConfiguration({cX:200,cY:200,r:200,holeRadius:100});
+// el.setConfiguration({cX:200,cY:200,r:200});
+document.body.appendChild(el.draw(200,200,200));
+
+//NAIL
+// el = new NailChart();
+// el.loadData(testObj);
+// el.setConfiguration({orientation:'horizontal',h:100,w:400});
+// document.body.appendChild(el.draw('vertical',400,100));
+
+//LEGEND
+// el = new Legend();
+// el.loadData(testObj);
+// document.body.appendChild(el.draw());
