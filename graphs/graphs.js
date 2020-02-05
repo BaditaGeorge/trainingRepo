@@ -288,7 +288,7 @@ DonutChart.prototype.draw = function(){
         for(let el of superThis.elements){
             if(e.target === el[0]){
                 superThis.txt = document.createElementNS('http://www.w3.org/2000/svg','text');
-                let textToAdd = el[1].label + '' + el[1].percent;
+                let textToAdd = el[1].label + ' ' + el[1].percent + '%';
                 superThis.txt.setAttribute('x',superThis.cX - textToAdd.length*3);
                 superThis.txt.setAttribute('y',superThis.cY);
                 superThis.txt.textContent = textToAdd;
@@ -381,7 +381,7 @@ let el;
 //PIE
 el = new GraphFactory('DonutChart');
 el.loadData(testObj);
-el.setConfiguration({cX:200,cY:200,r:200,holeRadius:100});
+el.setConfiguration({cX:200,cY:200,r:200,holeRadius:150});
 // el.setConfiguration({cX:200,cY:200,r:200});
 document.body.appendChild(el.draw(200,200,200));
 
