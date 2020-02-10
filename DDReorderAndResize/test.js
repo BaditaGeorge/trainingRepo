@@ -1,24 +1,38 @@
-function base1(){
-    this.react = function(){
-        console.log('reaction!');
+// function base1(){
+    
+// }
+// base1.prototype.react = function(){
+//     console.log('reaction!');
+// }
+
+// function base2(){
+    
+// }
+
+// base2.prototype['react'] = base1.prototype.react;
+// base1.prototype.react = function(){
+//     console.log('that a boy!');
+// }
+// new base2().react();
+
+function change(a,x){
+    for(let i=0;i<a.length;i++){
+        // if(a[i].el%2 === 0){
+        //     a[i].el = a[i].el*2;
+        // }
+        a.pop();
     }
+    x = 15;
+    console.log(a);
 }
 
-function base2(){
-    this.react2 = function(){
-        console.log('2nd reaction!');
-    }
+let a = [];
+
+for(let i=0;i<5;i++){
+    let obj = {};
+    obj.el = i;
+    a.push(obj);
 }
-
-function notBase(){
-
-}
-
-notBase.prototype = {
-    fst:new base1(),
-    snd:new base2()
-};
-
-a = new notBase();
-a.fst.react();
-a.snd.react2();
+let x = 10;
+change(a,x);
+console.log(a,x);

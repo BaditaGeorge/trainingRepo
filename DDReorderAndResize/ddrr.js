@@ -39,8 +39,9 @@ Draggable.prototype.mouseDown = false;
 
 Draggable.prototype.drag = function(e){
     if(this.mouseDown === true){
+        // console.log(this.width,this.height);
         let pX = e.clientX - this.width/2;
-        let pY = e.clientY - this.height/2;
+        let pY = e.clientY - this.height/2 - this.originalY;
         this.move({x:pX,y:pY});
     }
 }
@@ -82,8 +83,10 @@ SVGShape.prototype.draw = function(confDraw){
     }
     this.startX = confDraw.startX;
     this.startY = confDraw.startY;
-    this.height = confDraw.endY - confDraw.startY;
-    this.width = confDraw.endX - confDraw.startX;
+    this.originalY = confDraw.startY;
+    this.height = Math.abs(confDraw.endY - confDraw.startY);
+    this.width = Math.abs(confDraw.endX - confDraw.startX);
+    console.log(this.startX,this.startY,this.height,this.width);
     let arcPth = [
         'M',confDraw.startX,confDraw.startY,
         'L',confDraw.endX,confDraw.startY,
@@ -110,7 +113,7 @@ SVGShape.prototype.move = function(posObj){
         throw new Error("can't move to a position with undefined x or y-axis position!");
     }
 
-    this.svgPth.setAttribute('transform','translate(' + this.startX + ',' + posObj.y + ')');
+    this.svgPth.setAttribute('transform','translate(' + 0 + ',' + posObj.y + ')');
     // this.startX = posObj.x;
     this.startY = posObj.y;
 }
