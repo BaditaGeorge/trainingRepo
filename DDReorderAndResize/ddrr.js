@@ -39,6 +39,10 @@ Draggable.prototype.mouseDown = false;
 
 Draggable.prototype.drag = function (e) {
     if (this.mouseDown === true) {
+        eventTarget.fire({
+            type:'drag',
+
+        });
         // console.log(this.width,this.height);
         let pX = e.clientX - this.width / 2;
         let pY = e.clientY - this.height / 2;
@@ -46,16 +50,30 @@ Draggable.prototype.drag = function (e) {
     }
 }
 
-Draggable.prototype.drop = function (container) {
-    this.mouseDown = false;
+Draggable.prototype.drop = function (container, objectTarget) {
+    if (this.mouseDown === true) {
+        this.mouseDown = false;
+        if (eventTarget !== undefined && objectTarget !== undefined) {
+            eventTarget.fire({
+                type: 'drop',
+                target: objectTarget
+            });
+        }
+        this.move({ x: this.startX, y: this.dropY });
+        // this.dropY = this.startY;
+    }
     // container.removeChild(this.shadow);
     // this.shadow = undefined;
 }
 
-Draggable.prototype.dragDrop = function (container,eventTarget) {
+Draggable.prototype.dragDrop = function (container, objectTarget) {
     let superThis = this;
+    if (this.dropY === undefined) {
+        this.dropY = this.startY;
+    }
     container.addEventListener('mousedown', (e) => {
         if (e.target === superThis.svgPth) {
+            console.log(this);
             superThis.mouseDown = true;
             // this.shadow = this.drawShadow();
             // container.appendChild(this.shadow);
@@ -65,9 +83,9 @@ Draggable.prototype.dragDrop = function (container,eventTarget) {
     container.addEventListener('mousemove', (e) => {
         this.drag(e);
     });
-    
+
     container.addEventListener('mouseup', (e) => {
-        this.drop(container);
+        this.drop(container, objectTarget);
     });
 }
 

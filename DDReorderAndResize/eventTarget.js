@@ -30,7 +30,7 @@ EventTarget.prototype = {
         if(this._listeners && this._listeners[event.type] instanceof Array){
             let listeners = this._listeners[event.type];
             for(let i=0,len=listeners.length;i<len;i++){
-                listeners[i].call(this,event);
+                listeners[i].call(event.target,event.data);
             }
         }
     },

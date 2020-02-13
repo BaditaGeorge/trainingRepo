@@ -1,9 +1,8 @@
 function ListView(container, dotConfig) {
     this.container = container;
-    this.padding = 10;
+    this.padding = 80;
     this.lastLimit = 10;
     this.dotManager = new DotManager(dotConfig);
-    this.eventTarget = new EventTarget();
 }
 
 
@@ -12,31 +11,72 @@ ListView.prototype.addElement = function (confObj) {
         this.elements = [];
     }
     let element = new SVGShape();
-    console.log(this.lastLimit);
+    // console.log(this.lastLimit);
     confObj.startY = this.lastLimit;
     confObj.endY += this.lastLimit;
-    console.log(confObj.startY, confObj.endY);
+    // console.log(confObj.startY, confObj.endY);
     element.draw(confObj);
     this.lastLimit = confObj.endY + this.padding;
-    element.dragDrop(this.container);
+    element.dragDrop(this.container, this);
     this.elements.push(element);
     this.container.appendChild(element.svgPth);
     // this.container.addEventListener('mousedown',)
 }
 
 ListView.prototype.reorder = function () {
-
-}
-
-ListView.prototype.checkHitBox = function (svgPth, positionY, height) {
-    for (let i = 0; i < this.elements.length; i++) {
-        if (this.elements[i].svgPth !== svgPth) {
-            if (this.elements[i].startY + this.elements[i].height / 2 <= positionY && positionY + height < this.elements[i].startY + this.elements[i].height * 2) {
-                return this.elements[i].startY + this.elements[i].height;
+    let firstDropY = this.element.dropY;
+    let indexOf;
+    let lastDropIndex;
+    if (this.up === 0) {
+        for (let i = 0; i < this.elements.length; i++) {
+            if (this.elements[i] !== this.element) {
+                if (this.elements[i].dropY > this.element.dropY && this.elements[i].dropY < this.element.startY + this.element.height) {
+                    let tempValue = this.elements[i].dropY;
+                    this.elements[i].move({ x: this.elements[i].startX, y: firstDropY });
+                    this.elements[i].dropY = firstDropY;
+                    firstDropY = tempValue;
+                    lastDropIndex = i;
+                }
+            } else {
+                indexOf = i;
+            }
+        }
+    } else {
+        for (let i = this.elements.length - 1; i >= 0; i--) {
+            if (this.elements[i] !== this.element) {
+                if (this.elements[i].dropY < this.element.dropY && this.elements[i].dropY + this.elements[i].height > this.element.startY) {
+                    let tempValue = this.elements[i].dropY;
+                    this.elements[i].move({ x: this.elements[i].startX, y: firstDropY });
+                    this.elements[i].dropY = firstDropY;
+                    firstDropY = tempValue;
+                    lastDropIndex = i;
+                }
+            } else {
+                indexOf = i;
             }
         }
     }
-    return -1;
+    this.elements.splice(indexOf, 1);
+    this.elements.splice(lastDropIndex, 0, this.element);
+    this.element.dropY = firstDropY;
+}
+
+ListView.prototype.checkHitBox = function (svgPth, positionY, dropY, height) {
+    // console.log(dropY);
+    for (let i = 0; i < this.elements.length; i++) {
+        if (this.elements[i].svgPth !== svgPth) {
+            if (dropY < this.elements[i].startY) {
+                if (this.elements[i].startY + this.elements[i].height / 2 <= positionY && positionY + height < this.elements[i].startY + this.elements[i].height * 2) {
+                    return [(this.elements[i].startY + this.elements[i].height), 0];
+                }
+            } else {
+                if (this.elements[i].startY + this.elements[i].height / 2 >= positionY && positionY + height > this.elements[i].startY + this.elements[i].height) {
+                    return [this.elements[i].startY, 1];
+                }
+            }
+        }
+    }
+    return [-1];
 }
 
 ListView.prototype.addLine = function (positionY) {
@@ -73,6 +113,15 @@ ListView.prototype.addListeners = function () {
         return -1;
     }
 
+    let indexOfDot = (target) => {
+        for (let i = 0; i < this.dotManager.dots.length; i++) {
+            if (this.dotManager.dots[i].svgPth === target) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
     this.mouseDown = false;
     this.target;
 
@@ -81,27 +130,36 @@ ListView.prototype.addListeners = function () {
 
         if (indexOfOcc !== -1) {
             this.target = this.elements[indexOfOcc].svgPth;
-            this.dotManager.putOnElement(this.container, this.elements[indexOfOcc]);
+            this.element = this.elements[indexOfOcc];
+            this.container.removeChild(this.element.svgPth);
+            this.container.appendChild(this.element.svgPth);
+            this.dotManager.putOnElement(this.container, this.element);
         } else {
-            this.dotManager.removeElements(this.container);
+            let indexOf = indexOfDot(e.target);
+            if (indexOf !== -1) {
+                this.dotManager.removeElements(this.container);
+            }
         }
         this.mouseDown = true;
     });
 
     this.container.addEventListener('mouseup', (e) => {
-        this.mouseDown = false;
-        this.target = undefined;
+        if (indexOfElement(e.target) !== -1) {
+            this.mouseDown = false;
+            this.target = undefined;
+            this.dotManager.moveElements(this.element);
+            this.removeLine();
+            this.element = undefined;
+        }
     });
 
     this.container.addEventListener('mousemove', (e) => {
         if (this.mouseDown === true) {
-            let indexOfOcc = indexOfElement(this.target);
-
-            if (indexOfOcc !== -1) {
-                
-                let hitBoxBorder = this.checkHitBox(this.elements[indexOfOcc].svgPth, this.elements[indexOfOcc].startY, this.elements[indexOfOcc].height);
-                
+            if (this.element !== undefined) {
+                let checkHitBoxValue = this.checkHitBox(this.element.svgPth, this.element.startY, this.element.dropY, this.element.height);
+                let hitBoxBorder = checkHitBoxValue[0];
                 if (hitBoxBorder !== -1) {
+                    this.up = checkHitBoxValue[1];
                     if (this.straightLine === undefined) {
                         this.addLine(hitBoxBorder);
                     }
@@ -109,10 +167,12 @@ ListView.prototype.addListeners = function () {
                     this.removeLine();
                 }
 
-                this.dotManager.moveElements(this.elements[indexOfOcc]);
+                this.dotManager.moveElements(this.element);
             }
         }
     });
+
+    eventTarget.addListener('drop', this.reorder);
 }
 
 ListView.prototype.removeElement = function (index) {

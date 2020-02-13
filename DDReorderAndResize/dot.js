@@ -3,7 +3,7 @@ function DotShape() {
 }
 
 mixin(DotShape.prototype, SVGShape.prototype);
-mixout(DotShape.prototype, Draggable.prototype);
+// mixout(DotShape.prototype, Draggable.prototype);
 //direction va putea fi x,y,d
 //dotManager-ul va seta valoarea acestui atribut, si pe baza lui, vom valida in move daca se poate sau nu face miscarea in directia respectiva
 DotShape.prototype.direction = undefined;
@@ -110,6 +110,7 @@ DotManager.prototype.putOnElement = function (container, element) {
         let positions = this.computePosition(this.dots[i][0].position, element);
         newSquare.draw({ startX: positions[0], startY: positions[1], endX: positions[0] + size, endY: positions[1] + size, color: this.dots[i][0].color });
         this.dots[i].push(newSquare);
+        this.dots[i][1].dragDrop(container);
         container.appendChild(this.dots[i][1].svgPth);
     }
 }
