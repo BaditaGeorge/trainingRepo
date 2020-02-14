@@ -17,7 +17,15 @@ ListView.prototype.addElement = function (confObj) {
     // console.log(confObj.startY, confObj.endY);
     element.draw(confObj);
     this.lastLimit = confObj.endY + this.padding;
-    element.dragDrop(this.container, this);
+    element.dragDrop(this.container,{
+        eventDrag:{
+            type:'drag'
+        },
+        eventDrop:{
+            type:'drop',
+            target:this
+        }
+    });
     this.elements.push(element);
     this.container.appendChild(element.svgPth);
     // this.container.addEventListener('mousedown',)
@@ -27,6 +35,9 @@ ListView.prototype.reorder = function () {
     let firstDropY = this.element.dropY;
     let indexOf;
     let lastDropIndex;
+    if(this.straightLine === undefined){
+        return;
+    }
     if (this.up === 0) {
         for (let i = 0; i < this.elements.length; i++) {
             if (this.elements[i] !== this.element) {
@@ -115,7 +126,7 @@ ListView.prototype.addListeners = function () {
 
     let indexOfDot = (target) => {
         for (let i = 0; i < this.dotManager.dots.length; i++) {
-            if (this.dotManager.dots[i].svgPth === target) {
+            if (this.dotManager.dots[i][1].svgPth === target) {
                 return i;
             }
         }
@@ -137,6 +148,21 @@ ListView.prototype.addListeners = function () {
         } else {
             let indexOf = indexOfDot(e.target);
             if (indexOf !== -1) {
+                eventTarget.addListener('resize',this.dotManager.dots[indexOf][1].resizeElement);
+                this.dotManager.dots[indexOf][1].dragDrop(this.container,{
+                    eventDrag:{
+                        type:'resize',
+                        target:this.dotManager.dots[indexOf][1],
+                        data:{
+                            element:this.element,
+                            container:this.container,
+                            dotManager:this.dotManager
+                        }
+                    },
+                    eventDrop:{
+                    }
+                },false);
+            }else{
                 this.dotManager.removeElements(this.container);
             }
         }
@@ -149,7 +175,12 @@ ListView.prototype.addListeners = function () {
             this.target = undefined;
             this.dotManager.moveElements(this.element);
             this.removeLine();
-            this.element = undefined;
+            // this.element = undefined;
+        }else{
+            let indexOf = indexOfDot(e.target);
+            if(indexOf !== -1){
+                eventTarget.removeListener('resize',this.dotManager.dots[indexOf][1].resizeElement);
+            }
         }
     });
 
@@ -173,6 +204,7 @@ ListView.prototype.addListeners = function () {
     });
 
     eventTarget.addListener('drop', this.reorder);
+    // eventTarget.addListener('resize',this.dotManager)
 }
 
 ListView.prototype.removeElement = function (index) {

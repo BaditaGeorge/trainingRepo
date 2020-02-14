@@ -19,6 +19,10 @@ EventTarget.prototype = {
     },
 
     fire:function(event){
+        if(event.target === undefined && event.type === undefined){
+            return;
+        }
+
         if(!event.target){
             event.target = this;
         }

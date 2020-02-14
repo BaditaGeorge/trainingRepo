@@ -37,43 +37,47 @@ function Draggable() {
 
 Draggable.prototype.mouseDown = false;
 
-Draggable.prototype.drag = function (e) {
+Draggable.prototype.drag = function (e,eventObject) {
     if (this.mouseDown === true) {
-        eventTarget.fire({
-            type:'drag',
-
-        });
+        eventTarget.fire(eventObject);
         // console.log(this.width,this.height);
         let pX = e.clientX - this.width / 2;
         let pY = e.clientY - this.height / 2;
-        this.move({ x: pX, y: pY });
+        this.moveAtDrag({ x: pX, y: pY });
     }
 }
 
-Draggable.prototype.drop = function (container, objectTarget) {
+Draggable.prototype.drop = function (container, eventObject) {
     if (this.mouseDown === true) {
         this.mouseDown = false;
-        if (eventTarget !== undefined && objectTarget !== undefined) {
-            eventTarget.fire({
-                type: 'drop',
-                target: objectTarget
-            });
+        if (eventObject !== undefined) {
+            eventTarget.fire(eventObject);
         }
-        this.move({ x: this.startX, y: this.dropY });
+
+        if (this.moveAtDrop === true) {
+            this.moveAtDrag({ x: this.startX, y: this.dropY });
+        }
         // this.dropY = this.startY;
     }
     // container.removeChild(this.shadow);
     // this.shadow = undefined;
 }
 
-Draggable.prototype.dragDrop = function (container, objectTarget) {
+Draggable.prototype.dragDrop = function (container, events, moveAtDrop) {
     let superThis = this;
+
+    if (moveAtDrop === undefined) {
+        this.moveAtDrop = true;
+    } else {
+        this.moveAtDrop = moveAtDrop;
+    }
     if (this.dropY === undefined) {
         this.dropY = this.startY;
     }
+
     container.addEventListener('mousedown', (e) => {
         if (e.target === superThis.svgPth) {
-            console.log(this);
+            console.log(this.svgPth);
             superThis.mouseDown = true;
             // this.shadow = this.drawShadow();
             // container.appendChild(this.shadow);
@@ -81,13 +85,53 @@ Draggable.prototype.dragDrop = function (container, objectTarget) {
     });
 
     container.addEventListener('mousemove', (e) => {
-        this.drag(e);
+        this.drag(e,events.eventDrag);
     });
 
     container.addEventListener('mouseup', (e) => {
-        this.drop(container, objectTarget);
+        this.drop(container,events.eventDrop);
     });
 }
+
+function Resizable() {
+
+}
+
+Resizable.prototype.resizeElement = function (valueObject) {
+    let element = valueObject.element;
+    let dotManager = valueObject.dotManager;
+    let configurationObject = {};
+    function setFields(startX, startY, endX, endY) {
+        configurationObject.startX = startX;
+        configurationObject.startY = startY;
+        configurationObject.endX = endX;
+        configurationObject.endY = endY;
+    }
+    
+    if (this.direction === 'x') {
+        console.log(this.startX,this.originalX);
+        if (this.startX > this.originalX) {
+            setFields(element.startX, element.startY, this.startX + this.size / 2, element.startY + element.height);
+        } else if(this.startX < this.originalX) {
+            console.log('aici');
+            setFields(this.startX + this.size / 2, element.startY, element.startX + element.width, element.startY + element.height);
+        }
+    } else if (this.direction === 'y') {
+        if (this.startY > this.originalY) {
+            setFields(element.startX, element.startY, element.startX + element.width, this.startY + this.size / 2);
+        } else if(this.startY < this.originalY) {
+            setFields(element.startX, this.startY + this.size / 2, element.startX + element.width, element.startY + element.height);
+        }
+    } else {
+
+    }
+
+    if(configurationObject.startX !== undefined && configurationObject.startY !== undefined && configurationObject.endX !== undefined && configurationObject.endY !== undefined){
+        element.draw(configurationObject);
+    }
+    dotManager.putOnElement(valueObject.container,valueObject.element);
+}
+
 
 function SVGShape() {
 
@@ -108,6 +152,7 @@ SVGShape.prototype.draw = function (confDraw) {
     this.startX = confDraw.startX;
     this.startY = confDraw.startY;
     this.originalY = confDraw.startY;
+    this.originalX = confDraw.startX;
     this.height = Math.abs(confDraw.endY - confDraw.startY);
     this.width = Math.abs(confDraw.endX - confDraw.startX);
     // console.log(this.startX,this.startY,this.height,this.width);
@@ -155,5 +200,7 @@ SVGShape.prototype.move = function (posObj) {
     // this.startX = posObj.x;
     this.startY = posObj.y;
 }
+
+SVGShape.prototype.moveAtDrag = SVGShape.prototype.move;
 
 mixin(SVGShape.prototype, Draggable.prototype);

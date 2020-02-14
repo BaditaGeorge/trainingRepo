@@ -3,11 +3,13 @@ function DotShape() {
 }
 
 mixin(DotShape.prototype, SVGShape.prototype);
+mixin(DotShape.prototype, Resizable.prototype);
 // mixout(DotShape.prototype, Draggable.prototype);
 //direction va putea fi x,y,d
 //dotManager-ul va seta valoarea acestui atribut, si pe baza lui, vom valida in move daca se poate sau nu face miscarea in directia respectiva
 DotShape.prototype.direction = undefined;
 DotShape.prototype.resize = undefined;
+DotShape.prototype.size = 15; //fixed value for dot
 DotShape.prototype.moveAtDrag = function (posObj) {
     if (posObj === undefined) {
         throw new Error("Need a config object for positioning!");
@@ -18,13 +20,13 @@ DotShape.prototype.moveAtDrag = function (posObj) {
     }
 
     if (this.direction === 'x') {
-        this.svgPth.setAttribute('transform', 'translate(' + posObj.x + ',' + this.startY + ')');
+        this.svgPth.setAttribute('transform', 'translate(' + (posObj.x - this.originalX) + ',' + (this.startY - this.originalY) + ')');
         this.startX = posObj.x;
     } else if (this.direction === 'y') {
-        this.svgPth.setAttribute('transform', 'translate(' + this.startX + ',' + posObj.y + ')');
+        this.svgPth.setAttribute('transform', 'translate(' + 0 + ',' + (posObj.y - this.originalY) + ')');
         this.startY = posObj.y;
     } else if (this.direction === 'd') {
-        this.svgPth.setAttribute('transform', 'translate(' + posObj.x + ',' + posObj.y + ')');
+        this.svgPth.setAttribute('transform', 'translate(' + (posObj.x - this.originalX) + ',' + (posObj.y - this.originalY) + ')');
         this.startX = posObj.x;
         this.startY = posObj.y;
     }
@@ -70,22 +72,32 @@ DotManager.prototype.computePosition = function (stringPos, element) {
     let w = element.width;
     let size = 15;
 
-    if (stringPos === 'l') { return [x - size/2, y + h / 2 - size / 2]; }
-    else if (stringPos === 'r') { return [x + w - size/2, y + h / 2 - size / 2]; }
-    else if (stringPos === 'u') { return [x + w / 2 - size / 2, y - size/2]; }
-    else if (stringPos === 'd') { return [x + w / 2 - size / 2, y + h - size/2]; }
-    else if (stringPos === 'ul') { return [x - size / 2, y - size/2]; }
-    else if (stringPos === 'ur') { return [x + w - size / 2, y - size/2]; }
-    else if (stringPos === 'dl') { return [x - size / 2, y + h - size/2]; }
-    else if (stringPos === 'dr') { return [x + w - size / 2, y + h - size/2]; }
+    if (stringPos === 'l') { return [x - size / 2, y + h / 2 - size / 2]; }
+    else if (stringPos === 'r') { return [x + w - size / 2, y + h / 2 - size / 2]; }
+    else if (stringPos === 'u') { return [x + w / 2 - size / 2, y - size / 2]; }
+    else if (stringPos === 'd') { return [x + w / 2 - size / 2, y + h - size / 2]; }
+    else if (stringPos === 'ul') { return [x - size / 2, y - size / 2]; }
+    else if (stringPos === 'ur') { return [x + w - size / 2, y - size / 2]; }
+    else if (stringPos === 'dl') { return [x - size / 2, y + h - size / 2]; }
+    else if (stringPos === 'dr') { return [x + w - size / 2, y + h - size / 2]; }
     else { return []; }
 }
 
 DotManager.prototype.moveElements = function (element) {
     if (this.dots[0].length > 1) {
         for (let i = 0; i < this.dots.length; i++) {
-            this.dots[i][1].move({x:0 , y: this.computePosition(this.dots[i][0].position, element)[1] });
+            this.dots[i][1].move({ x: 0, y: this.computePosition(this.dots[i][0].position, element)[1] });
         }
+    }
+}
+
+DotManager.prototype.computeOrientation = function (stringPos) {
+    if (stringPos === 'l' || stringPos === 'r') {
+        return 'x';
+    } else if (stringPos === 'u' || stringPos === 'd') {
+        return 'y';
+    } else {
+        return 'd';
     }
 }
 
@@ -105,12 +117,20 @@ DotManager.prototype.putOnElement = function (container, element) {
     let size = 15;
     this.removeElements(container);
 
+    // if (eventObject === undefined) {
+    //     eventObject = {
+    //         eventDrag:{},
+    //         eventDrop:{}
+    //     };
+    // }
+
     for (let i = 0; i < this.dots.length; i++) {
         let newSquare = new DotShape();
         let positions = this.computePosition(this.dots[i][0].position, element);
         newSquare.draw({ startX: positions[0], startY: positions[1], endX: positions[0] + size, endY: positions[1] + size, color: this.dots[i][0].color });
         this.dots[i].push(newSquare);
-        this.dots[i][1].dragDrop(container);
+        this.dots[i][1].direction = this.computeOrientation(this.dots[i][0].position);
+        // this.dots[i][1].dragDrop(container, eventObject, false);
         container.appendChild(this.dots[i][1].svgPth);
     }
 }
