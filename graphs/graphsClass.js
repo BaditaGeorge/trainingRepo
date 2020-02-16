@@ -402,11 +402,11 @@ let el;
 
 
 //PIE
-el = new GraphFactory('PieChart');
+el = new GraphFactory('DonutChart');
 el.loadData(testObj);
-// el.setConfiguration({cX:200,cY:200,r:200,holeRadius:150});
+el.setConfiguration({cX:200,cY:200,r:200,holeRadius:150});
 // el.setConfiguration({orientation:'horizontal',h:100,w:500});
-el.setConfiguration({cX:200,cY:200,r:200});
+// el.setConfiguration({cX:200,cY:200,r:200});
 document.body.appendChild(el.draw());
 
 //NAIL
