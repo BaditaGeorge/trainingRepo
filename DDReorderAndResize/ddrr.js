@@ -37,7 +37,7 @@ function Draggable() {
 
 Draggable.prototype.mouseDown = false;
 
-Draggable.prototype.drag = function (e,eventObject) {
+Draggable.prototype.drag = function (e, eventObject) {
     if (this.mouseDown === true) {
         eventTarget.fire(eventObject);
         // console.log(this.width,this.height);
@@ -77,7 +77,6 @@ Draggable.prototype.dragDrop = function (container, events, moveAtDrop) {
 
     container.addEventListener('mousedown', (e) => {
         if (e.target === superThis.svgPth) {
-            console.log(this.svgPth);
             superThis.mouseDown = true;
             // this.shadow = this.drawShadow();
             // container.appendChild(this.shadow);
@@ -85,11 +84,16 @@ Draggable.prototype.dragDrop = function (container, events, moveAtDrop) {
     });
 
     container.addEventListener('mousemove', (e) => {
-        this.drag(e,events.eventDrag);
+        if (events.eventDrag.data !== undefined) {
+            events.eventDrag.data.mouseX = e.clientX;
+            events.eventDrag.data.mouseY = e.clientY;
+        }
+
+        this.drag(e, events.eventDrag);
     });
 
     container.addEventListener('mouseup', (e) => {
-        this.drop(container,events.eventDrop);
+        this.drop(container, events.eventDrop);
     });
 }
 
@@ -98,8 +102,15 @@ function Resizable() {
 }
 
 Resizable.prototype.resizeElement = function (valueObject) {
+
+    // if (this.oldX === undefined && this.oldY === undefined) {
+    //     this.oldX = valueObject.mouseX;
+    //     this.oldY = valueObject.mouseY;
+    // }
+
     let element = valueObject.element;
     let dotManager = valueObject.dotManager;
+
     let configurationObject = {};
     function setFields(startX, startY, endX, endY) {
         configurationObject.startX = startX;
@@ -107,29 +118,58 @@ Resizable.prototype.resizeElement = function (valueObject) {
         configurationObject.endX = endX;
         configurationObject.endY = endY;
     }
-    
+
+
     if (this.direction === 'x') {
-        console.log(this.startX,this.originalX);
-        if (this.startX > this.originalX) {
+        if (this.position === 'r') {
             setFields(element.startX, element.startY, this.startX + this.size / 2, element.startY + element.height);
-        } else if(this.startX < this.originalX) {
-            console.log('aici');
+        } else if (this.position === 'l') {
             setFields(this.startX + this.size / 2, element.startY, element.startX + element.width, element.startY + element.height);
         }
     } else if (this.direction === 'y') {
-        if (this.startY > this.originalY) {
+
+        if (this.position === 'd') {
             setFields(element.startX, element.startY, element.startX + element.width, this.startY + this.size / 2);
-        } else if(this.startY < this.originalY) {
+        } else if (this.position === 'u') {
             setFields(element.startX, this.startY + this.size / 2, element.startX + element.width, element.startY + element.height);
         }
+
     } else {
 
+        if(this.position === 'ul'){
+            setFields(this.startX + this.size/2, this.startY + this.size/2 , element.startX + element.width, element.startY + element.height);
+        }else if(this.position === 'ur'){
+            setFields(element.startX, this.startY + this.size/2, this.startX + this.size/2, element.startY + element.height);
+        }else if(this.position === 'dl'){
+            setFields(this.startX + this.size/2, element.startY, element.startX + element.width, this.startY + this.size/2);
+        }else if(this.position === 'dr'){
+            setFields(element.startX,element.startY,this.startX + this.size/2,this.startY + this.size/2);
+        }
+
     }
 
-    if(configurationObject.startX !== undefined && configurationObject.startY !== undefined && configurationObject.endX !== undefined && configurationObject.endY !== undefined){
+    this.oldX = valueObject.mouseX;
+    this.oldY = valueObject.mouseY;
+    // if (this.direction === 'x') {
+    //     if (this.startX > this.originalX) {
+    //         setFields(element.startX, element.startY, this.startX + this.size / 2, element.startY + element.height);
+    //     } else if (this.startX < this.originalX) {
+    //         setFields(this.startX + this.size / 2, element.startY, element.startX + element.width, element.startY + element.height);
+    //     }
+    // } else if (this.direction === 'y') {
+    //     if (this.startY > this.originalY) {
+    //         setFields(element.startX, element.startY, element.startX + element.width, this.startY + this.size / 2);
+    //     } else if (this.startY < this.originalY) {
+    //         setFields(element.startX, this.startY + this.size / 2, element.startX + element.width, element.startY + element.height);
+    //     }
+    // } else {
+
+    // }
+
+    if (configurationObject.startX !== undefined && configurationObject.startY !== undefined && configurationObject.endX !== undefined && configurationObject.endY !== undefined) {
         element.draw(configurationObject);
     }
-    dotManager.putOnElement(valueObject.container,valueObject.element);
+    dotManager.putOnElement(valueObject.container, valueObject.element);
 }
 
 
@@ -155,7 +195,6 @@ SVGShape.prototype.draw = function (confDraw) {
     this.originalX = confDraw.startX;
     this.height = Math.abs(confDraw.endY - confDraw.startY);
     this.width = Math.abs(confDraw.endX - confDraw.startX);
-    // console.log(this.startX,this.startY,this.height,this.width);
     let arcPth = [
         'M', confDraw.startX, confDraw.startY,
         'L', confDraw.endX, confDraw.startY,

@@ -17,13 +17,13 @@ ListView.prototype.addElement = function (confObj) {
     // console.log(confObj.startY, confObj.endY);
     element.draw(confObj);
     this.lastLimit = confObj.endY + this.padding;
-    element.dragDrop(this.container,{
-        eventDrag:{
-            type:'drag'
+    element.dragDrop(this.container, {
+        eventDrag: {
+            type: 'drag'
         },
-        eventDrop:{
-            type:'drop',
-            target:this
+        eventDrop: {
+            type: 'drop',
+            target: this
         }
     });
     this.elements.push(element);
@@ -35,7 +35,7 @@ ListView.prototype.reorder = function () {
     let firstDropY = this.element.dropY;
     let indexOf;
     let lastDropIndex;
-    if(this.straightLine === undefined){
+    if (this.straightLine === undefined) {
         return;
     }
     if (this.up === 0) {
@@ -125,9 +125,11 @@ ListView.prototype.addListeners = function () {
     }
 
     let indexOfDot = (target) => {
-        for (let i = 0; i < this.dotManager.dots.length; i++) {
-            if (this.dotManager.dots[i][1].svgPth === target) {
-                return i;
+        if (this.dotManager.dots[0][1] !== undefined) {
+            for (let i = 0; i < this.dotManager.dots.length; i++) {
+                if (this.dotManager.dots[i][1].svgPth === target) {
+                    return i;
+                }
             }
         }
         return -1;
@@ -148,21 +150,21 @@ ListView.prototype.addListeners = function () {
         } else {
             let indexOf = indexOfDot(e.target);
             if (indexOf !== -1) {
-                eventTarget.addListener('resize',this.dotManager.dots[indexOf][1].resizeElement);
-                this.dotManager.dots[indexOf][1].dragDrop(this.container,{
-                    eventDrag:{
-                        type:'resize',
-                        target:this.dotManager.dots[indexOf][1],
-                        data:{
-                            element:this.element,
-                            container:this.container,
-                            dotManager:this.dotManager
+                eventTarget.addListener('resize', this.dotManager.dots[indexOf][1].resizeElement);
+                this.dotManager.dots[indexOf][1].dragDrop(this.container, {
+                    eventDrag: {
+                        type: 'resize',
+                        target: this.dotManager.dots[indexOf][1],
+                        data: {
+                            element: this.element,
+                            container: this.container,
+                            dotManager: this.dotManager
                         }
                     },
-                    eventDrop:{
+                    eventDrop: {
                     }
-                },false);
-            }else{
+                }, false);
+            } else {
                 this.dotManager.removeElements(this.container);
             }
         }
@@ -176,10 +178,10 @@ ListView.prototype.addListeners = function () {
             this.dotManager.moveElements(this.element);
             this.removeLine();
             // this.element = undefined;
-        }else{
+        } else {
             let indexOf = indexOfDot(e.target);
-            if(indexOf !== -1){
-                eventTarget.removeListener('resize',this.dotManager.dots[indexOf][1].resizeElement);
+            if (indexOf !== -1) {
+                eventTarget.removeListener('resize', this.dotManager.dots[indexOf][1].resizeElement);
             }
         }
     });
