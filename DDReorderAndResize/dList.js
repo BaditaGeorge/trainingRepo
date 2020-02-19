@@ -38,10 +38,43 @@ ListView.prototype.reorder = function () {
     if (this.straightLine === undefined) {
         return;
     }
+
+    // if (this.up === 0) {
+
+    //     for (let i = 0; i < this.elements.length; i++) {
+    //         if (this.elements[i] !== this.element) {
+    //             if (this.lineY > this.elements[i].dropY) {
+    //                 let tempValue = this.elements[i].dropY;
+    //                 this.elements[i].move({ x: this.elements[i].startX, y: firstDropY });
+    //                 this.elements[i].dropY = firstDropY;
+    //                 firstDropY = tempValue;
+    //                 lastDropIndex = i;
+    //             }
+    //         } else {
+    //             indexOf = i;
+    //         }
+    //     }
+
+    // } else {
+    //     for (let i = this.elements.length - 1; i >= 0; i--) {
+    //         if (this.elements[i] !== this.element) {
+    //             if (this.lineY < this.elements[i].dropY) {
+    //                 let tempValue = this.elements[i].dropY;
+    //                 this.elements[i].move({ x: this.elements[i].startX, y: firstDropY });
+    //                 this.elements[i].dropY = firstDropY;
+    //                 firstDropY = tempValue;
+    //                 lastDropIndex = i;
+    //             }
+    //         } else {
+    //             indexOf = i;
+    //         }
+    //     }
+    // }
+
     if (this.up === 0) {
         for (let i = 0; i < this.elements.length; i++) {
             if (this.elements[i] !== this.element) {
-                if (this.elements[i].dropY > this.element.dropY && this.elements[i].dropY < this.element.startY + this.element.height) {
+                if (this.elements[i].dropY > this.element.dropY && this.elements[i].dropY < this.element.startY) {
                     let tempValue = this.elements[i].dropY;
                     this.elements[i].move({ x: this.elements[i].startX, y: firstDropY });
                     this.elements[i].dropY = firstDropY;
@@ -55,7 +88,7 @@ ListView.prototype.reorder = function () {
     } else {
         for (let i = this.elements.length - 1; i >= 0; i--) {
             if (this.elements[i] !== this.element) {
-                if (this.elements[i].dropY < this.element.dropY && this.elements[i].dropY + this.elements[i].height > this.element.startY) {
+                if (this.elements[i].dropY < this.element.dropY && this.elements[i].dropY + this.elements[i].height > this.element.startY + this.element.height) {
                     let tempValue = this.elements[i].dropY;
                     this.elements[i].move({ x: this.elements[i].startX, y: firstDropY });
                     this.elements[i].dropY = firstDropY;
@@ -74,26 +107,110 @@ ListView.prototype.reorder = function () {
 
 ListView.prototype.checkHitBox = function (svgPth, positionY, dropY, height) {
     // console.log(dropY);
-    for (let i = 0; i < this.elements.length; i++) {
-        if (this.elements[i].svgPth !== svgPth) {
-            if (dropY < this.elements[i].startY) {
-                if (this.elements[i].startY + this.elements[i].height / 2 <= positionY && positionY + height < this.elements[i].startY + this.elements[i].height * 2) {
-                    return [(this.elements[i].startY + this.elements[i].height), 0];
-                }
+    // for (let i = 0; i < this.elements.length; i++) {
+    //     if (this.elements[i].svgPth !== svgPth) {
+    //         if (dropY < this.elements[i].startY) {
+    //             if (this.elements[i].startY + this.elements[i].height / 2 <= positionY && positionY + height < this.elements[i].startY + this.elements[i].height * 2) {
+    //                 return [(this.elements[i].startY + this.elements[i].height), 0];
+    //             }
+    //         } else {
+    //             if (this.elements[i].startY + this.elements[i].height / 2 >= positionY && positionY + height > this.elements[i].startY + this.elements[i].height) {
+    //                 return [this.elements[i].startY, 1];
+    //             }
+    //         }
+    //     }
+    // }
+    console.log(positionY);
+    let bounderies = [];
+    let len = this.elements.length;
+    for (let i = 0; i < this.elements.length - 1; i++) {
+        bounderies.push({ up: this.elements[i].startY + this.elements[i].height, down: this.elements[i + 1].startY, h1: this.elements[i].height, h2: this.elements[i + 1].height });
+    }
+
+    if (positionY < this.elements[0].startY && this.elements[0].svgPth !== svgPth) {
+        return [this.elements[0].startY, 1];
+    }
+
+    if (positionY > this.elements[len - 1].startY + this.elements[len - 1].height && this.elements[len - 1].svgPth !== svgPth) {
+        return [(this.elements[len - 1].startY + this.elements[len - 1].height), 0];
+    }
+
+    for (let i = 0; i < bounderies.length; i++) {
+        if ((bounderies[i].up < positionY && positionY + height > bounderies[i].down && positionY + height < bounderies[i].down + bounderies[i].h2)
+            || (bounderies[i].up > positionY && positionY + height > bounderies[i].up && positionY + height < bounderies[i].down)) {
+            if (dropY < bounderies[i].up) {
+                return [(bounderies[i].up + this.padding / 2), 0];
             } else {
-                if (this.elements[i].startY + this.elements[i].height / 2 >= positionY && positionY + height > this.elements[i].startY + this.elements[i].height) {
-                    return [this.elements[i].startY, 1];
-                }
+                return [(bounderies[i].up + this.padding / 2), 1];
             }
         }
     }
+
+    // for (let i = 0; i < this.elements.length; i++) {
+    //     if (this.elements[i].svgPth !== svgPth) {
+
+    // if (i === 0) {
+    //     if (positionY < this.elements[i].startY) {
+    //         return [this.elements[i].startY, 1];
+    //     }
+    // } else if (i === this.elements.length - 1) {
+    //     if (positionY + height > this.elements[i].startY + this.elements[i].height) {
+    //         return [(this.elements[i].startY + this.elements[i].height), 0];
+    //     } else if (this.elements[i - 1].startY + this.elements[i-1].height/2 < positionY && positionY < this.elements[i].startY){
+    //         return [(this.elements[i-1].startY + this.elements[i-1].height),0];
+    //     }
+    // } else {
+    //     if (dropY < this.elements[i].startY) {
+    //         if (this.elements[i - 1].startY < positionY && positionY < this.elements[i].startY) {
+    //             return [(this.elements[i-1].startY + this.elements[i-1].height), 0];
+    //         }
+    //     } else {
+    //         if (this.elements[i].startY > positionY && this.elements[i].startY < positionY + height && this.elements[i - 1].startY < positionY) {
+    //             return [this.elements[i-1].startY, 1];
+    //         }
+    //     }
+    // }
+    // if (dropY < this.elements[i].startY) {
+    //     if (i !== this.elements.length - 1) {
+    //         if (this.elements[i - 1].startY < positionY && this.elements[i - 1].startY + this.element[i - 1].height > positionY && this.elements[i].startY < positionY + height) {
+    //             return [(this.elements[i].startY + this.elements[i].height),0];
+    //         }
+    //     } else {
+    //         if(positionY + height > this.elements[i].startY + this.elements[i].height){
+    //             return [(this.elements[i].startY + this.elements[i].height),0];
+    //         }
+    //     }
+    // } else {
+    //     if (i !== 0) {
+    //         if (this.elements[i].startY > positionY && this.elements[i].startY < positionY + height && this.elements[i - 1].startY < positionY) {
+    //             return [this.elements[i].startY,1];
+    //         }
+    //     } else {
+    //         if(positionY < this.elements[i].startY){
+    //             return [this.elements[i].startY,1];
+    //         }       
+    //     }
+    // }
+    //     if (dropY < this.elements[i].startY) {
+    //         if (this.elements[i].startY + this.elements[i].height / 2 <= positionY && positionY + height < this.elements[i].startY + this.elements[i].height * 2) {
+    //             return [(this.elements[i].startY + this.elements[i].height), 0];
+    //         }
+    //     } else {
+    //         if (this.elements[i].startY + this.elements[i].height / 2 >= positionY && positionY + height > this.elements[i].startY + this.elements[i].height) {
+    //             return [this.elements[i].startY, 1];
+    //         }
+    //     }
+    // }
+    // }
+
     return [-1];
 }
 
 ListView.prototype.addLine = function (positionY) {
     this.straightLine = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     let positionX = 0;
-    positionY += this.padding / 2;
+    this.lineY = positionY;
+    // positionY += this.padding / 2;
     let lineLength = 500;
     let arcPth = [
         'M', positionX, positionY,

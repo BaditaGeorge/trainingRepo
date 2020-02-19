@@ -20,7 +20,7 @@ DotShape.prototype.moveAtDrag = function (posObj) {
     }
 
     if (this.direction === 'x') {
-        this.svgPth.setAttribute('transform', 'translate(' + (posObj.x - this.originalX) + ',' + (this.startY - this.originalY) + ')');
+        this.svgPth.setAttribute('transform', 'translate(' + (posObj.x - this.originalX) + ',' + 0 + ')');
         this.startX = posObj.x;
     } else if (this.direction === 'y') {
         this.svgPth.setAttribute('transform', 'translate(' + 0 + ',' + (posObj.y - this.originalY) + ')');
