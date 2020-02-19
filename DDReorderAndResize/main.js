@@ -7,7 +7,7 @@ svgBox.setAttribute('width',1600);
 svgBox.setAttribute('height',1000);
 // a.resize({startX:20,startY:20,endX:170,endY:120});
 document.body.appendChild(svgBox);
-let dotConfig = {number:4,data:[{position:'l',color:'black'},{position:'r',color:'black'},{position:'u',color:'black'},{position:'d',color:'black'}]};
+let dotConfig = {number:6,data:[{position:'l',color:'black'},{position:'r',color:'black'},{position:'u',color:'black'},{position:'d',color:'black'},{position:'ul',color:'black'},{position:'ur',color:'black'}]};
 let lst = new ListView(svgBox,dotConfig);
 lst.addElement(a);
 a = {startX:10,startY:0,endX:110,endY:100,color:'blue'};

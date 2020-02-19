@@ -20,7 +20,7 @@ DotShape.prototype.moveAtDrag = function (posObj) {
     }
 
     if (this.direction === 'x') {
-        this.svgPth.setAttribute('transform', 'translate(' + (posObj.x - this.originalX) + ',' + (this.startY - this.originalY) + ')');
+        this.svgPth.setAttribute('transform', 'translate(' + (posObj.x - this.originalX) + ',' + 0 + ')');
         this.startX = posObj.x;
     } else if (this.direction === 'y') {
         this.svgPth.setAttribute('transform', 'translate(' + 0 + ',' + (posObj.y - this.originalY) + ')');
@@ -130,6 +130,7 @@ DotManager.prototype.putOnElement = function (container, element) {
         newSquare.draw({ startX: positions[0], startY: positions[1], endX: positions[0] + size, endY: positions[1] + size, color: this.dots[i][0].color });
         this.dots[i].push(newSquare);
         this.dots[i][1].direction = this.computeOrientation(this.dots[i][0].position);
+        this.dots[i][1].position = this.dots[i][0].position;
         // this.dots[i][1].dragDrop(container, eventObject, false);
         container.appendChild(this.dots[i][1].svgPth);
     }
