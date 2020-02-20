@@ -18,23 +18,3 @@ lst.addElement(a);
 a = {startX:10,startY:0,endX:110,endY:100,color:'black'};
 lst.addElement(a);
 lst.addListeners();
-// lst.removeElement(0);
-// lst.elements[0].resize({startX:20,startY:20,endX:170,endY:120});
-
-
-
-// svgBox.appendChild(a.svgPth);
-// a.dragDrop(svgBox);
-// svgBox.addEventListener('mousedown',(e)=>{
-//     if(e.target === a.svgPth){
-//         isOn = true;
-//     }
-// });
-// svgBox.addEventListener('mousemove',(e)=>{
-//     if(isOn === true){
-//         a.drag(e);
-//     }
-// });
-// svgBox.addEventListener('mouseup',(e)=>{
-//     isOn = false;
-// });

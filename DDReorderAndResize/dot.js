@@ -48,13 +48,6 @@ function DotManager(configObj) {
     this.isCreate = false;
 }
 
-// DotManager.prototype.create = function(configObj){
-//     this.dots = [];
-//     for(let i=0;i<configObj.number;i++){
-//         this.dots.push(configObj.data[i]);
-//     }
-// }
-
 DotManager.prototype.removeElements = function (container) {
     for (let i = 0; i < this.dots.length; i++) {
         if (this.dots[i].length > 1) {
@@ -103,26 +96,8 @@ DotManager.prototype.computeOrientation = function (stringPos) {
 
 DotManager.prototype.putOnElement = function (container, element) {
 
-    // function computePosition(stringPos){
-    //     if(stringPos === 'l'){ return [x,y+h/2-size/2]; }
-    //     else if(stringPos === 'r'){ return [x+w,y+h/2-size/2]; }
-    //     else if(stringPos === 'u'){ return [x+w/2-size/2,y]; }
-    //     else if(stringPos === 'd'){ return [x+w/2-size/2,y+h]; }
-    //     else if(stringPos === 'ul'){ return [x-size/2,y]; }
-    //     else if(stringPos === 'ur'){ return [x+w-size/2,y]; }
-    //     else if(stringPos === 'dl'){ return [x-size/2,y+h]; }
-    //     else if(stringPos === 'dr'){ return [x+w-size/2,y+h]; }
-    //     else {return [];}
-    // }
     let size = 15;
     this.removeElements(container);
-
-    // if (eventObject === undefined) {
-    //     eventObject = {
-    //         eventDrag:{},
-    //         eventDrop:{}
-    //     };
-    // }
 
     for (let i = 0; i < this.dots.length; i++) {
         let newSquare = new DotShape();

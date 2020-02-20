@@ -150,21 +150,6 @@ Resizable.prototype.resizeElement = function (valueObject) {
 
     this.oldX = valueObject.mouseX;
     this.oldY = valueObject.mouseY;
-    // if (this.direction === 'x') {
-    //     if (this.startX > this.originalX) {
-    //         setFields(element.startX, element.startY, this.startX + this.size / 2, element.startY + element.height);
-    //     } else if (this.startX < this.originalX) {
-    //         setFields(this.startX + this.size / 2, element.startY, element.startX + element.width, element.startY + element.height);
-    //     }
-    // } else if (this.direction === 'y') {
-    //     if (this.startY > this.originalY) {
-    //         setFields(element.startX, element.startY, element.startX + element.width, this.startY + this.size / 2);
-    //     } else if (this.startY < this.originalY) {
-    //         setFields(element.startX, this.startY + this.size / 2, element.startX + element.width, element.startY + element.height);
-    //     }
-    // } else {
-
-    // }
 
     if (configurationObject.startX !== undefined && configurationObject.startY !== undefined && configurationObject.endX !== undefined && configurationObject.endY !== undefined) {
         element.draw(configurationObject);
@@ -236,7 +221,6 @@ SVGShape.prototype.move = function (posObj) {
     }
 
     this.svgPth.setAttribute('transform', 'translate(' + 0 + ',' + (posObj.y - this.originalY) + ')');
-    // this.startX = posObj.x;
     this.startY = posObj.y;
 }
 
