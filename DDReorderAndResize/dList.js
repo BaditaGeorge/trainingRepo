@@ -1,6 +1,7 @@
 function ListView(container, dotConfig) {
     this.container = container;
     this.padding = 80;
+    this.inferiorLimit = 10;
     this.lastLimit = 10;
     this.dotManager = new DotManager(dotConfig);
 }
@@ -29,6 +30,51 @@ ListView.prototype.addElement = function (confObj) {
     this.elements.push(element);
     this.container.appendChild(element.svgPth);
     // this.container.addEventListener('mousedown',)
+}
+
+ListView.prototype.reorder = function(){
+    let firstDropY = this.inferiorLimit;
+    let indexOf;
+    let lastDropIndex;
+    let firstToMove = false;
+    if (this.straightLine === undefined) {
+        return;
+    }
+
+    if (this.up === 0) {
+        for (let i = 0; i < this.elements.length; i++) {
+            if (this.elements[i] !== this.element) {
+                if (this.elements[i].dropY > this.element.dropY && this.elements[i].dropY < this.element.startY) {
+                    let tempValue = this.elements[i].dropY;
+                    this.elements[i].move({ x: this.elements[i].startX, y: firstDropY });
+                    this.elements[i].dropY = firstDropY;
+                    firstDropY = tempValue;
+                    lastDropIndex = i;
+                }else{
+                    firstDropY += (this.elements[i].dropY + this.padding);
+                }
+            } else {
+                indexOf = i;
+            }
+        }
+    } else {
+        for (let i = this.elements.length - 1; i >= 0; i--) {
+            if (this.elements[i] !== this.element) {
+                if (this.elements[i].dropY < this.element.dropY && this.elements[i].dropY + this.elements[i].height > this.element.startY + this.element.height) {
+                    let tempValue = this.elements[i].dropY;
+                    this.elements[i].move({ x: this.elements[i].startX, y: firstDropY });
+                    this.elements[i].dropY = firstDropY;
+                    firstDropY = tempValue;
+                    lastDropIndex = i;
+                }
+            } else {
+                indexOf = i;
+            }
+        }
+    }
+    this.elements.splice(indexOf, 1);
+    this.elements.splice(lastDropIndex, 0, this.element);
+    this.element.dropY = firstDropY;
 }
 
 ListView.prototype.reorder = function () {
@@ -159,6 +205,7 @@ ListView.prototype.addListeners = function () {
             this.target = this.elements[indexOfOcc].svgPth;
             this.element = this.elements[indexOfOcc];
             this.container.removeChild(this.element.svgPth);
+            // console.log(this.element.svgPth);
             this.container.appendChild(this.element.svgPth);
             this.dotManager.putOnElement(this.container, this.element);
         } else {
@@ -172,7 +219,8 @@ ListView.prototype.addListeners = function () {
                         data: {
                             element: this.element,
                             container: this.container,
-                            dotManager: this.dotManager
+                            dotManager: this.dotManager,
+                            list:this
                         }
                     },
                     eventDrop: {
@@ -220,7 +268,34 @@ ListView.prototype.addListeners = function () {
     });
 
     eventTarget.addListener('drop', this.reorder);
+    eventTarget.addListener('pushAtResize',this.pushElements);
     // eventTarget.addListener('resize',this.dotManager)
+}
+
+ListView.prototype.pushElements = function(configObject){
+    let border = configObject.border;
+    let up = configObject.up;
+    // let svgPth = configObject.svgPth;
+    let mustBeModified = false;
+    console.log(border);
+    if(up === 0){
+        for(let i=0;i<this.elements.length;i++){
+            if(this.elements[i].startY > border || mustBeModified === true){
+                // this.elements[i].moveByOrigin = this.padding - (this.elements[i].startY - border);
+                this.elements[i].move({x:this.elements[i].startX,y:this.elements[i].startY + this.padding - (this.elements[i].startY - border)});
+                // this.elements[i].originalY = this.elements[i].startY;
+                border = this.elements[i].startY + this.elements[i].height;
+                this.elements[i].dropY = this.elements[i].startY;
+                mustBeModified = true;
+            }
+        }
+    }else{
+        for(let i=this.elements.length - 1; i>=0; i--){
+            if(this.elements[i].startY < border){
+                this.elements[i].move({x:this.elements[i].startX,y:this.elements[i].startY + this.padding - (this.elements[i].startY + this.elements[i].height - border)});
+            }
+        }
+    }
 }
 
 ListView.prototype.removeElement = function (index) {

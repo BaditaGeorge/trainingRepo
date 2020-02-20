@@ -41,8 +41,9 @@ Draggable.prototype.drag = function (e, eventObject) {
     if (this.mouseDown === true) {
         eventTarget.fire(eventObject);
         // console.log(this.width,this.height);
-        let pX = e.clientX - this.width / 2;
-        let pY = e.clientY - this.height / 2;
+        let pX = e.pageX - this.width / 2;
+        let pY = e.pageY - this.height / 2;
+        // console.log('PageY',e.pageY);
         this.moveAtDrag({ x: pX, y: pY });
     }
 }
@@ -56,6 +57,9 @@ Draggable.prototype.drop = function (container, eventObject) {
 
         if (this.moveAtDrop === true) {
             this.moveAtDrag({ x: this.startX, y: this.dropY });
+            this.translated = true;
+            // this.draw({startX:this.startX,startY:this.dropY,endX:this.startX + this.width,endY:this.dropY+this.height});
+            // this.draw({startX:this.startX,startY:this.startY,endX:this.startX + this.width,endY:this.startY + this.height});
         }
         // this.dropY = this.startY;
     }
@@ -85,8 +89,8 @@ Draggable.prototype.dragDrop = function (container, events, moveAtDrop) {
 
     container.addEventListener('mousemove', (e) => {
         if (events.eventDrag.data !== undefined) {
-            events.eventDrag.data.mouseX = e.clientX;
-            events.eventDrag.data.mouseY = e.clientY;
+            events.eventDrag.data.mouseX = e.pageX;
+            events.eventDrag.data.mouseY = e.pageY;
         }
 
         this.drag(e, events.eventDrag);
@@ -127,22 +131,70 @@ Resizable.prototype.resizeElement = function (valueObject) {
             setFields(this.startX + this.size / 2, element.startY, element.startX + element.width, element.startY + element.height);
         }
     } else if (this.direction === 'y') {
-
+        // console.log(valueObject.container);
         if (this.position === 'd') {
             setFields(element.startX, element.startY, element.startX + element.width, this.startY + this.size / 2);
+            eventTarget.fire({
+                type:'pushAtResize',
+                target:valueObject.list,
+                data:{
+                    border:configurationObject.endY,
+                    up:0
+                }
+            });
         } else if (this.position === 'u') {
+            eventTarget.fire({
+                type:'pushAtResize',
+                target:valueObject.list,
+                data:{
+                    border:configurationObject.startY,
+                    up:1
+                }
+            });
             setFields(element.startX, this.startY + this.size / 2, element.startX + element.width, element.startY + element.height);
         }
 
     } else {
 
         if(this.position === 'ul'){
+            eventTarget.fire({
+                type:'pushAtResize',
+                target:valueObject.list,
+                data:{
+                    border:configurationObject.startY,
+                    up:1
+                }
+            });
             setFields(this.startX + this.size/2, this.startY + this.size/2 , element.startX + element.width, element.startY + element.height);
         }else if(this.position === 'ur'){
+            eventTarget.fire({
+                type:'pushAtResize',
+                target:valueObject.list,
+                data:{
+                    border:configurationObject.startY,
+                    up:1
+                }
+            });
             setFields(element.startX, this.startY + this.size/2, this.startX + this.size/2, element.startY + element.height);
         }else if(this.position === 'dl'){
+            eventTarget.fire({
+                type:'pushAtResize',
+                target:valueObject.list,
+                data:{
+                    border:configurationObject.endY,
+                    up:0
+                }
+            });
             setFields(this.startX + this.size/2, element.startY, element.startX + element.width, this.startY + this.size/2);
         }else if(this.position === 'dr'){
+            eventTarget.fire({
+                type:'pushAtResize',
+                target:valueObject.list,
+                data:{
+                    border:configurationObject.endY,
+                    up:0
+                }
+            });
             setFields(element.startX,element.startY,this.startX + this.size/2,this.startY + this.size/2);
         }
 
@@ -150,10 +202,11 @@ Resizable.prototype.resizeElement = function (valueObject) {
 
     this.oldX = valueObject.mouseX;
     this.oldY = valueObject.mouseY;
-
+    // console.log(configurationObject.startY);
     if (configurationObject.startX !== undefined && configurationObject.startY !== undefined && configurationObject.endX !== undefined && configurationObject.endY !== undefined) {
         element.draw(configurationObject);
     }
+    
     dotManager.putOnElement(valueObject.container, valueObject.element);
 }
 
@@ -176,6 +229,7 @@ SVGShape.prototype.draw = function (confDraw) {
     }
     this.startX = confDraw.startX;
     this.startY = confDraw.startY;
+    this.oldY = this.originalY;
     this.originalY = confDraw.startY;
     this.originalX = confDraw.startX;
     this.height = Math.abs(confDraw.endY - confDraw.startY);
@@ -190,6 +244,10 @@ SVGShape.prototype.draw = function (confDraw) {
     this.svgPth.setAttribute('d', arcPth);
     if (confDraw.color !== undefined) {
         this.svgPth.setAttribute('fill', confDraw.color);
+    }
+    if(this.translated === true){
+        // this.svgPth.setAttribute('transform','translate('+ 0 + ',' + (this.originalY - 2*this.oldY) + ')');
+        this.translated = undefined;
     }
 }
 
@@ -220,6 +278,13 @@ SVGShape.prototype.move = function (posObj) {
         throw new Error("can't move to a position with undefined x or y-axis position!");
     }
 
+    // this.svgPth.setAttribute('transform', 'translate(' + 0 + ',' + (posObj.y - this.originalY) + ')');
+    // console.log(posObj.y);
+    // console.log(this.originalY);
+    // let moveBy = 0;
+    // if(this.moveByOrigin !== undefined){
+    //     moveBy = this.moveByOrigin;
+    // }
     this.svgPth.setAttribute('transform', 'translate(' + 0 + ',' + (posObj.y - this.originalY) + ')');
     this.startY = posObj.y;
 }
