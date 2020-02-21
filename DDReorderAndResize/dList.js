@@ -1,8 +1,8 @@
 function ListView(container, dotConfig) {
     this.container = container;
     this.padding = 80;
-    this.inferiorLimit = 10;
-    this.lastLimit = 10;
+    this.inferiorLimit = 50;
+    this.lastLimit = 50;
     this.dotManager = new DotManager(dotConfig);
 }
 
@@ -40,74 +40,48 @@ ListView.prototype.reorder = function(){
     if (this.straightLine === undefined) {
         return;
     }
-
+    let tempDropY = this.element.dropY;
     if (this.up === 0) {
-        for (let i = 0; i < this.elements.length; i++) {
+        // firstDropY -= 
+        firstDropY = this.lastLimit;
+        // console.log(firstDropY);
+        for (let i = this.elements.length - 1; i >= 0; i--) {
             if (this.elements[i] !== this.element) {
-                if (this.elements[i].dropY > this.element.dropY && this.elements[i].dropY < this.element.startY) {
-                    let tempValue = this.elements[i].dropY;
-                    this.elements[i].move({ x: this.elements[i].startX, y: firstDropY });
+                if (this.elements[i].dropY > tempDropY && this.elements[i].dropY < this.element.startY) {
+                    if(firstToMove === false){
+                        firstDropY -= (this.element.height + this.padding);
+                        this.element.dropY = this.elements[i].dropY;
+                        firstToMove = true;
+                        lastDropIndex = i;
+                    }
+                    firstDropY -= (this.elements[i].height + this.padding);
+                    // console.log(firstDropY);
+                    this.elements[i].move({x:this.elements[i].startX,y:firstDropY});
                     this.elements[i].dropY = firstDropY;
-                    firstDropY = tempValue;
-                    lastDropIndex = i;
+                    // lastDropIndex = i;
                 }else{
-                    firstDropY += (this.elements[i].dropY + this.padding);
+                    firstDropY -= (this.elements[i].height + this.padding);
                 }
             } else {
                 indexOf = i;
             }
         }
     } else {
-        for (let i = this.elements.length - 1; i >= 0; i--) {
-            if (this.elements[i] !== this.element) {
-                if (this.elements[i].dropY < this.element.dropY && this.elements[i].dropY + this.elements[i].height > this.element.startY + this.element.height) {
-                    let tempValue = this.elements[i].dropY;
-                    this.elements[i].move({ x: this.elements[i].startX, y: firstDropY });
-                    this.elements[i].dropY = firstDropY;
-                    firstDropY = tempValue;
-                    lastDropIndex = i;
-                }
-            } else {
-                indexOf = i;
-            }
-        }
-    }
-    this.elements.splice(indexOf, 1);
-    this.elements.splice(lastDropIndex, 0, this.element);
-    this.element.dropY = firstDropY;
-}
-
-ListView.prototype.reorder = function () {
-    let firstDropY = this.element.dropY;
-    let indexOf;
-    let lastDropIndex;
-    if (this.straightLine === undefined) {
-        return;
-    }
-
-    if (this.up === 0) {
+        firstDropY = this.inferiorLimit;
         for (let i = 0; i < this.elements.length; i++) {
             if (this.elements[i] !== this.element) {
-                if (this.elements[i].dropY > this.element.dropY && this.elements[i].dropY < this.element.startY) {
-                    let tempValue = this.elements[i].dropY;
-                    this.elements[i].move({ x: this.elements[i].startX, y: firstDropY });
+                if (this.elements[i].dropY < tempDropY && this.elements[i].dropY + this.elements[i].height > this.element.startY + this.element.height) {
+                    if(firstToMove === false){
+                        firstDropY += (this.element.height + this.padding);
+                        this.element.dropY = this.elements[i].dropY;
+                        firstToMove = true;
+                        lastDropIndex = i;
+                    }
+                    this.elements[i].move({x:this.elements[i].startX,y:firstDropY});
                     this.elements[i].dropY = firstDropY;
-                    firstDropY = tempValue;
-                    lastDropIndex = i;
-                }
-            } else {
-                indexOf = i;
-            }
-        }
-    } else {
-        for (let i = this.elements.length - 1; i >= 0; i--) {
-            if (this.elements[i] !== this.element) {
-                if (this.elements[i].dropY < this.element.dropY && this.elements[i].dropY + this.elements[i].height > this.element.startY + this.element.height) {
-                    let tempValue = this.elements[i].dropY;
-                    this.elements[i].move({ x: this.elements[i].startX, y: firstDropY });
-                    this.elements[i].dropY = firstDropY;
-                    firstDropY = tempValue;
-                    lastDropIndex = i;
+                    firstDropY += (this.elements[i].height + this.padding);
+                }else{
+                    firstDropY += (this.elements[i].height + this.padding);
                 }
             } else {
                 indexOf = i;
@@ -116,8 +90,11 @@ ListView.prototype.reorder = function () {
     }
     this.elements.splice(indexOf, 1);
     this.elements.splice(lastDropIndex, 0, this.element);
-    this.element.dropY = firstDropY;
+    // console.log(firstDropY);
+    // console.log(this.element.dropY);
+    // this.element.dropY = firstDropY;
 }
+
 
 ListView.prototype.checkHitBox = function (svgPth, positionY, dropY, height) {
     // console.log(positionY);
@@ -248,9 +225,20 @@ ListView.prototype.addListeners = function () {
         }
     });
 
+    this.noDotClicked = function(){
+        for(let i=0;i<this.dotManager.dots.length;i++){
+            if(this.dotManager.dots[i][1].resizing === true){
+                console.log('hipi');
+                return false;
+            }
+        }
+        return true;
+    }
+
     this.container.addEventListener('mousemove', (e) => {
         if (this.mouseDown === true) {
-            if (this.element !== undefined) {
+            if (this.element !== undefined && this.noDotClicked() === true) {
+                console.log('ah');
                 let checkHitBoxValue = this.checkHitBox(this.element.svgPth, this.element.startY, this.element.dropY, this.element.height);
                 let hitBoxBorder = checkHitBoxValue[0];
                 if (hitBoxBorder !== -1) {
@@ -277,7 +265,6 @@ ListView.prototype.pushElements = function(configObject){
     let up = configObject.up;
     // let svgPth = configObject.svgPth;
     let mustBeModified = false;
-    console.log(border);
     if(up === 0){
         for(let i=0;i<this.elements.length;i++){
             if(this.elements[i].startY > border || mustBeModified === true){
@@ -289,10 +276,14 @@ ListView.prototype.pushElements = function(configObject){
                 mustBeModified = true;
             }
         }
+        this.lastLimit = this.elements[this.elements.length - 1].dropY + this.elements[this.elements.length - 1].height + this.padding;
     }else{
         for(let i=this.elements.length - 1; i>=0; i--){
-            if(this.elements[i].startY < border){
-                this.elements[i].move({x:this.elements[i].startX,y:this.elements[i].startY + this.padding - (this.elements[i].startY + this.elements[i].height - border)});
+            if(this.elements[i].startY < border || mustBeModified === true){
+                this.elements[i].move({x:this.elements[i].startX,y:this.elements[i].startY - (this.elements[i].startY + this.elements[i].height + this.padding - border)});
+                border = this.elements[i].startY;
+                this.elements[i].dropY = this.elements[i].startY;
+                mustBeModified = true;
             }
         }
     }

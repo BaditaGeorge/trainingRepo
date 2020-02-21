@@ -10,6 +10,7 @@ mixin(DotShape.prototype, Resizable.prototype);
 DotShape.prototype.direction = undefined;
 DotShape.prototype.resize = undefined;
 DotShape.prototype.size = 15; //fixed value for dot
+DotShape.prototype.thisDotClicked = false;
 DotShape.prototype.moveAtDrag = function (posObj) {
     if (posObj === undefined) {
         throw new Error("Need a config object for positioning!");

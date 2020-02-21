@@ -55,9 +55,23 @@ Draggable.prototype.drop = function (container, eventObject) {
             eventTarget.fire(eventObject);
         }
 
-        if (this.moveAtDrop === true) {
+        if(this.isDotUp !== undefined && this.border !== undefined){
+            eventTarget.fire({
+                type: 'pushAtResize',
+                target: this.list,
+                data: {
+                    border: this.border,
+                    up: this.isDotUp
+                }
+            });
+        }
+        
+        if(this.resizing !== undefined){
+            this.resizing = undefined;
+        }
+
+        if (this.moveAtDrop === true && this.isDotUp === undefined) {
             this.moveAtDrag({ x: this.startX, y: this.dropY });
-            this.translated = true;
             // this.draw({startX:this.startX,startY:this.dropY,endX:this.startX + this.width,endY:this.dropY+this.height});
             // this.draw({startX:this.startX,startY:this.startY,endX:this.startX + this.width,endY:this.startY + this.height});
         }
@@ -79,26 +93,30 @@ Draggable.prototype.dragDrop = function (container, events, moveAtDrop) {
         this.dropY = this.startY;
     }
 
-    container.addEventListener('mousedown', (e) => {
+    let onMDown = (e) => {
         if (e.target === superThis.svgPth) {
             superThis.mouseDown = true;
-            // this.shadow = this.drawShadow();
-            // container.appendChild(this.shadow);
         }
-    });
+    }
 
-    container.addEventListener('mousemove', (e) => {
+    let onMMove = (e) => {
         if (events.eventDrag.data !== undefined) {
             events.eventDrag.data.mouseX = e.pageX;
             events.eventDrag.data.mouseY = e.pageY;
         }
 
         this.drag(e, events.eventDrag);
-    });
+    }
 
-    container.addEventListener('mouseup', (e) => {
+    let onMUp = (e) => {
         this.drop(container, events.eventDrop);
-    });
+    }
+
+    container.addEventListener('mousedown', onMDown);
+
+    container.addEventListener('mousemove', onMMove);
+
+    container.addEventListener('mouseup', onMUp);
 }
 
 function Resizable() {
@@ -106,11 +124,6 @@ function Resizable() {
 }
 
 Resizable.prototype.resizeElement = function (valueObject) {
-
-    // if (this.oldX === undefined && this.oldY === undefined) {
-    //     this.oldX = valueObject.mouseX;
-    //     this.oldY = valueObject.mouseY;
-    // }
 
     let element = valueObject.element;
     let dotManager = valueObject.dotManager;
@@ -123,79 +136,106 @@ Resizable.prototype.resizeElement = function (valueObject) {
         configurationObject.endY = endY;
     }
 
-
+    this.list = valueObject.list;
     if (this.direction === 'x') {
         if (this.position === 'r') {
-            setFields(element.startX, element.startY, this.startX + this.size / 2, element.startY + element.height);
+            if (element.startX < this.startX + this.size / 2) {
+                setFields(element.startX, element.startY, this.startX + this.size / 2, element.startY + element.height);
+            }
         } else if (this.position === 'l') {
-            setFields(this.startX + this.size / 2, element.startY, element.startX + element.width, element.startY + element.height);
+            if (this.startX + this.size / 2 < element.startX + element.width) {
+                setFields(this.startX + this.size / 2, element.startY, element.startX + element.width, element.startY + element.height);
+            }
         }
     } else if (this.direction === 'y') {
-        // console.log(valueObject.container);
         if (this.position === 'd') {
-            setFields(element.startX, element.startY, element.startX + element.width, this.startY + this.size / 2);
-            eventTarget.fire({
-                type:'pushAtResize',
-                target:valueObject.list,
-                data:{
-                    border:configurationObject.endY,
-                    up:0
-                }
-            });
+            if (element.startY < this.startY + this.size / 2) {
+                setFields(element.startX, element.startY, element.startX + element.width, this.startY + this.size / 2);
+                this.border = configurationObject.endY;
+                this.isDotUp = 0;
+                // eventTarget.fire({
+                //     type: 'pushAtResize',
+                //     target: valueObject.list,
+                //     data: {
+                //         border: configurationObject.endY,
+                //         up: 0
+                //     }
+                // });
+            }
         } else if (this.position === 'u') {
-            eventTarget.fire({
-                type:'pushAtResize',
-                target:valueObject.list,
-                data:{
-                    border:configurationObject.startY,
-                    up:1
-                }
-            });
-            setFields(element.startX, this.startY + this.size / 2, element.startX + element.width, element.startY + element.height);
+            if (this.startY + this.size / 2 < element.startY + element.height) {
+                setFields(element.startX, this.startY + this.size / 2, element.startX + element.width, element.startY + element.height);
+                this.border = configurationObject.startY;
+                this.isDotUp = 1;
+                // eventTarget.fire({
+                //     type: 'pushAtResize',
+                //     target: valueObject.list,
+                //     data: {
+                //         border: configurationObject.startY,
+                //         up: 1
+                //     }
+                // });
+            }
         }
 
     } else {
-
-        if(this.position === 'ul'){
-            eventTarget.fire({
-                type:'pushAtResize',
-                target:valueObject.list,
-                data:{
-                    border:configurationObject.startY,
-                    up:1
-                }
-            });
-            setFields(this.startX + this.size/2, this.startY + this.size/2 , element.startX + element.width, element.startY + element.height);
-        }else if(this.position === 'ur'){
-            eventTarget.fire({
-                type:'pushAtResize',
-                target:valueObject.list,
-                data:{
-                    border:configurationObject.startY,
-                    up:1
-                }
-            });
-            setFields(element.startX, this.startY + this.size/2, this.startX + this.size/2, element.startY + element.height);
-        }else if(this.position === 'dl'){
-            eventTarget.fire({
-                type:'pushAtResize',
-                target:valueObject.list,
-                data:{
-                    border:configurationObject.endY,
-                    up:0
-                }
-            });
-            setFields(this.startX + this.size/2, element.startY, element.startX + element.width, this.startY + this.size/2);
-        }else if(this.position === 'dr'){
-            eventTarget.fire({
-                type:'pushAtResize',
-                target:valueObject.list,
-                data:{
-                    border:configurationObject.endY,
-                    up:0
-                }
-            });
-            setFields(element.startX,element.startY,this.startX + this.size/2,this.startY + this.size/2);
+        if (this.position === 'ul') {
+            if (this.startX + this.size / 2 < element.startX + element.width && this.startY + this.size / 2 < element.startY + element.height) {
+                setFields(this.startX + this.size / 2, this.startY + this.size / 2, element.startX + element.width, element.startY + element.height);
+                this.border = configurationObject.startY;
+                this.isDotUp = 1;
+                // eventTarget.fire({
+                //     type: 'pushAtResize',
+                //     target: valueObject.list,
+                //     data: {
+                //         border: configurationObject.startY,
+                //         up: 1
+                //     }
+                // });
+                // setFields(this.startX + this.size / 2, this.startY + this.size / 2, element.startX + element.width, element.startY + element.height);
+            }
+        } else if (this.position === 'ur') {
+            if (this.startY + this.size / 2 < element.startY + element.height && this.startX + this.size / 2 > element.startX) {
+                setFields(element.startX, this.startY + this.size / 2, this.startX + this.size / 2, element.startY + element.height);
+                this.border = configurationObject.startY;
+                this.isDotUp = 1;
+                // eventTarget.fire({
+                //     type: 'pushAtResize',
+                //     target: valueObject.list,
+                //     data: {
+                //         border: configurationObject.startY,
+                //         up: 1
+                //     }
+                // });
+            }
+        } else if (this.position === 'dl') {
+            if (this.startX + this.size / 2 < element.startX + element.width && element.startY < this.startY + this.size / 2) {
+                setFields(this.startX + this.size / 2, element.startY, element.startX + element.width, this.startY + this.size / 2);
+                this.border = configurationObject.endY;
+                this.isDotUp = 0;
+                // eventTarget.fire({
+                //     type: 'pushAtResize',
+                //     target: valueObject.list,
+                //     data: {
+                //         border: configurationObject.endY,
+                //         up: 0
+                //     }
+                // });
+            }
+        } else if (this.position === 'dr') {
+            if (this.startX + this.size / 2 > element.startX && this.startY + this.size / 2 > element.startY) {
+                setFields(element.startX, element.startY, this.startX + this.size/2 , this.startY + this.size / 2);
+                this.border = configurationObject.endY;
+                this.isDotUp = 0;
+                // eventTarget.fire({
+                //     type: 'pushAtResize',
+                //     target: valueObject.list,
+                //     data: {
+                //         border: configurationObject.endY,
+                //         up: 0
+                //     }
+                // });
+            }
         }
 
     }
@@ -204,9 +244,9 @@ Resizable.prototype.resizeElement = function (valueObject) {
     this.oldY = valueObject.mouseY;
     // console.log(configurationObject.startY);
     if (configurationObject.startX !== undefined && configurationObject.startY !== undefined && configurationObject.endX !== undefined && configurationObject.endY !== undefined) {
+        this.resizing = true;
         element.draw(configurationObject);
     }
-    
     dotManager.putOnElement(valueObject.container, valueObject.element);
 }
 
@@ -245,7 +285,8 @@ SVGShape.prototype.draw = function (confDraw) {
     if (confDraw.color !== undefined) {
         this.svgPth.setAttribute('fill', confDraw.color);
     }
-    if(this.translated === true){
+    this.svgPth.setAttribute('transform', 'translate(0,0)');
+    if (this.translated === true) {
         // this.svgPth.setAttribute('transform','translate('+ 0 + ',' + (this.originalY - 2*this.oldY) + ')');
         this.translated = undefined;
     }
