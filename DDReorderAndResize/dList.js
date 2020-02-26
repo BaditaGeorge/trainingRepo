@@ -12,10 +12,10 @@ ListView.prototype.addElement = function (confObj) {
         this.elements = [];
     }
     let element = new SVGShape();
-    // console.log(this.lastLimit);
+
     confObj.startY = this.lastLimit;
     confObj.endY += this.lastLimit;
-    // console.log(confObj.startY, confObj.endY);
+
     element.draw(confObj);
     this.lastLimit = confObj.endY + this.padding;
     element.dragDrop(this.container, {
@@ -29,10 +29,10 @@ ListView.prototype.addElement = function (confObj) {
     });
     this.elements.push(element);
     this.container.appendChild(element.svgPth);
-    // this.container.addEventListener('mousedown',)
+
 }
 
-ListView.prototype.reorder = function(){
+ListView.prototype.reorder = function () {
     let firstDropY = this.inferiorLimit;
     let indexOf;
     let lastDropIndex;
@@ -41,46 +41,51 @@ ListView.prototype.reorder = function(){
         return;
     }
     let tempDropY = this.element.dropY;
+    
     if (this.up === 0) {
-        // firstDropY -= 
+
         firstDropY = this.lastLimit;
-        // console.log(firstDropY);
+        let indexOfFirst = undefined;
         for (let i = this.elements.length - 1; i >= 0; i--) {
             if (this.elements[i] !== this.element) {
-                if (this.elements[i].dropY > tempDropY && this.elements[i].dropY < this.element.startY) {
-                    if(firstToMove === false){
+                if (this.elements[i].dropY > tempDropY && (this.elements[i].dropY < this.element.startY || (this.elements[i].dropY < this.element.startY + this.element.height && this.elements[i].height < this.element.height))) {
+                    if (firstToMove === false) {
+                        indexOfFirst = i;
                         firstDropY -= (this.element.height + this.padding);
                         this.element.dropY = this.elements[i].dropY;
                         firstToMove = true;
                         lastDropIndex = i;
                     }
+
                     firstDropY -= (this.elements[i].height + this.padding);
-                    // console.log(firstDropY);
-                    this.elements[i].move({x:this.elements[i].startX,y:firstDropY});
+
+                    this.elements[i].move({ x: this.elements[i].startX, y: firstDropY });
                     this.elements[i].dropY = firstDropY;
-                    // lastDropIndex = i;
-                }else{
+
+                } else {
                     firstDropY -= (this.elements[i].height + this.padding);
                 }
             } else {
                 indexOf = i;
             }
         }
+        this.element.dropY = this.element.dropY - (this.element.height - this.elements[indexOfFirst].height);
     } else {
         firstDropY = this.inferiorLimit;
         for (let i = 0; i < this.elements.length; i++) {
             if (this.elements[i] !== this.element) {
-                if (this.elements[i].dropY < tempDropY && this.elements[i].dropY + this.elements[i].height > this.element.startY + this.element.height) {
-                    if(firstToMove === false){
+                if (this.elements[i].dropY < tempDropY && (this.elements[i].dropY + this.elements[i].height > this.element.startY + this.element.height ||
+                     (this.elements[i].dropY > this.element.startY && this.elements[i].height < this.element.height))) {
+                    if (firstToMove === false) {
                         firstDropY += (this.element.height + this.padding);
                         this.element.dropY = this.elements[i].dropY;
                         firstToMove = true;
                         lastDropIndex = i;
                     }
-                    this.elements[i].move({x:this.elements[i].startX,y:firstDropY});
+                    this.elements[i].move({ x: this.elements[i].startX, y: firstDropY });
                     this.elements[i].dropY = firstDropY;
                     firstDropY += (this.elements[i].height + this.padding);
-                }else{
+                } else {
                     firstDropY += (this.elements[i].height + this.padding);
                 }
             } else {
@@ -90,14 +95,11 @@ ListView.prototype.reorder = function(){
     }
     this.elements.splice(indexOf, 1);
     this.elements.splice(lastDropIndex, 0, this.element);
-    // console.log(firstDropY);
-    // console.log(this.element.dropY);
-    // this.element.dropY = firstDropY;
 }
 
 
 ListView.prototype.checkHitBox = function (svgPth, positionY, dropY, height) {
-    // console.log(positionY);
+
     let bounderies = [];
     let len = this.elements.length;
     for (let i = 0; i < this.elements.length - 1; i++) {
@@ -130,7 +132,7 @@ ListView.prototype.addLine = function (positionY) {
     this.straightLine = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     let positionX = 0;
     this.lineY = positionY;
-    // positionY += this.padding / 2;
+
     let lineLength = 500;
     let arcPth = [
         'M', positionX, positionY,
@@ -182,7 +184,7 @@ ListView.prototype.addListeners = function () {
             this.target = this.elements[indexOfOcc].svgPth;
             this.element = this.elements[indexOfOcc];
             this.container.removeChild(this.element.svgPth);
-            // console.log(this.element.svgPth);
+
             this.container.appendChild(this.element.svgPth);
             this.dotManager.putOnElement(this.container, this.element);
         } else {
@@ -197,14 +199,16 @@ ListView.prototype.addListeners = function () {
                             element: this.element,
                             container: this.container,
                             dotManager: this.dotManager,
-                            list:this
+                            list: this
                         }
                     },
                     eventDrop: {
                     }
                 }, false);
             } else {
-                this.dotManager.removeElements(this.container);
+                if (this.dotManager.elementsOn !== undefined) {
+                    this.dotManager.removeElements(this.container);
+                }
             }
         }
         this.mouseDown = true;
@@ -216,7 +220,7 @@ ListView.prototype.addListeners = function () {
             this.target = undefined;
             this.dotManager.moveElements(this.element);
             this.removeLine();
-            // this.element = undefined;
+
         } else {
             let indexOf = indexOfDot(e.target);
             if (indexOf !== -1) {
@@ -225,10 +229,12 @@ ListView.prototype.addListeners = function () {
         }
     });
 
-    this.noDotClicked = function(){
-        for(let i=0;i<this.dotManager.dots.length;i++){
-            if(this.dotManager.dots[i][1].resizing === true){
-                console.log('hipi');
+    this.noDotClicked = function () {
+        if (this.dotManager.dots[0][1] === undefined) {
+            return true;
+        }
+        for (let i = 0; i < this.dotManager.dots.length; i++) {
+            if (this.dotManager.dots[i][1].resizing === true) {
                 return false;
             }
         }
@@ -238,7 +244,6 @@ ListView.prototype.addListeners = function () {
     this.container.addEventListener('mousemove', (e) => {
         if (this.mouseDown === true) {
             if (this.element !== undefined && this.noDotClicked() === true) {
-                console.log('ah');
                 let checkHitBoxValue = this.checkHitBox(this.element.svgPth, this.element.startY, this.element.dropY, this.element.height);
                 let hitBoxBorder = checkHitBoxValue[0];
                 if (hitBoxBorder !== -1) {
@@ -256,37 +261,31 @@ ListView.prototype.addListeners = function () {
     });
 
     eventTarget.addListener('drop', this.reorder);
-    eventTarget.addListener('pushAtResize',this.pushElements);
-    // eventTarget.addListener('resize',this.dotManager)
+    eventTarget.addListener('pushAtResize', this.pushElements);
 }
 
-ListView.prototype.pushElements = function(configObject){
+ListView.prototype.pushElements = function (configObject) {
     let border = configObject.border;
     let up = configObject.up;
-    // let svgPth = configObject.svgPth;
+
     let mustBeModified = false;
-    if(up === 0){
-        for(let i=0;i<this.elements.length;i++){
-            if(this.elements[i].startY > border || mustBeModified === true){
-                // this.elements[i].moveByOrigin = this.padding - (this.elements[i].startY - border);
-                this.elements[i].move({x:this.elements[i].startX,y:this.elements[i].startY + this.padding - (this.elements[i].startY - border)});
-                // this.elements[i].originalY = this.elements[i].startY;
-                border = this.elements[i].startY + this.elements[i].height;
-                this.elements[i].dropY = this.elements[i].startY;
-                mustBeModified = true;
-            }
-        }
-        this.lastLimit = this.elements[this.elements.length - 1].dropY + this.elements[this.elements.length - 1].height + this.padding;
-    }else{
-        for(let i=this.elements.length - 1; i>=0; i--){
-            if(this.elements[i].startY < border || mustBeModified === true){
-                this.elements[i].move({x:this.elements[i].startX,y:this.elements[i].startY - (this.elements[i].startY + this.elements[i].height + this.padding - border)});
-                border = this.elements[i].startY;
-                this.elements[i].dropY = this.elements[i].startY;
-                mustBeModified = true;
-            }
+    if (up !== 0) {
+        this.element.move({ x: this.element.startX, y: this.element.dropY });
+        this.dotManager.moveElements(this.element);
+        border = this.element.startY + this.element.height;
+    }
+
+    for (let i = 0; i < this.elements.length; i++) {
+        if (this.elements[i].startY > this.element.oldY + this.element.oldHeight || mustBeModified === true) {
+
+            this.elements[i].move({ x: this.elements[i].startX, y: this.elements[i].startY + this.padding - (this.elements[i].startY - border) });
+
+            border = this.elements[i].startY + this.elements[i].height;
+            this.elements[i].dropY = this.elements[i].startY;
+            mustBeModified = true;
         }
     }
+    this.lastLimit = this.elements[this.elements.length - 1].dropY + this.elements[this.elements.length - 1].height + this.padding;
 }
 
 ListView.prototype.removeElement = function (index) {

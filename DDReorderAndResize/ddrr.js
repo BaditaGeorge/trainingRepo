@@ -65,6 +65,8 @@ Draggable.prototype.drop = function (container, eventObject) {
                 }
             });
         }
+
+        this.startToDrag = undefined;
         
         if(this.resizing !== undefined){
             this.resizing = undefined;
@@ -72,15 +74,14 @@ Draggable.prototype.drop = function (container, eventObject) {
 
         if (this.moveAtDrop === true && this.isDotUp === undefined) {
             this.moveAtDrag({ x: this.startX, y: this.dropY });
-            // this.draw({startX:this.startX,startY:this.dropY,endX:this.startX + this.width,endY:this.dropY+this.height});
-            // this.draw({startX:this.startX,startY:this.startY,endX:this.startX + this.width,endY:this.startY + this.height});
         }
+
         // this.dropY = this.startY;
     }
-    // container.removeChild(this.shadow);
-    // this.shadow = undefined;
 }
 
+//functia de dragDrop cu ajutorul caruia setez listenerii
+//important in aceasta fucntie este setarea elementului moveAtDrop care imi indica faptul ca elementul este draggable
 Draggable.prototype.dragDrop = function (container, events, moveAtDrop) {
     let superThis = this;
 
@@ -123,12 +124,20 @@ function Resizable() {
 
 }
 
+//functia ce se ocupa de partea de resize a elementului
+//toata clasa Resizable e legata doar de punctele de pe marginile si colturile elementului, dots-urile practic
+//in momentul in care aceste puncte se misca, elementul isi face resize
+//resize-ul consta in redesenarea la fiecare pas, adica, resetez coordonatele elementului de coltul caruia trag, si redesenez elementul cu noile coordonate
+//apelul acestei functii este prins in mouseMove-ul din functia de drag, este apelata cu ajutorul eventTarget-ului, prin functia fire
 Resizable.prototype.resizeElement = function (valueObject) {
 
     let element = valueObject.element;
     let dotManager = valueObject.dotManager;
 
     let configurationObject = {};
+
+    //o functie care se ocupa de setarea acestui obiect de configurare, pe care il trimit care functia de desenare a obiectului, la finalul logicii din cadrul functiei mari
+    
     function setFields(startX, startY, endX, endY) {
         configurationObject.startX = startX;
         configurationObject.startY = startY;
@@ -136,7 +145,15 @@ Resizable.prototype.resizeElement = function (valueObject) {
         configurationObject.endY = endY;
     }
 
+    if(this.startToDrag === undefined){
+        element.oldY = element.startY;
+        element.oldHeight = element.height;
+        this.startToDrag = true;
+    }
+
     this.list = valueObject.list;
+
+    //vad pe ce axa se misca elementul, pe x treaba e simpla, pur si simplu obiectul se redimensioneaza la stanga sau la dreapta
     if (this.direction === 'x') {
         if (this.position === 'r') {
             if (element.startX < this.startX + this.size / 2) {
@@ -148,33 +165,22 @@ Resizable.prototype.resizeElement = function (valueObject) {
             }
         }
     } else if (this.direction === 'y') {
+        //pe y este ceva mai complicat, deoarece sunt 6 puncte de care pot trage, si bineinteles, trebuie sa mut elementele de sub elementul caruia ii modific marimea
+        //border este practic noua limita superioara a elementului, limita superioara adica limita care e mai departe de partea de sus a ecranului(in partea de sus fiind coordonate 0 pe y)
+        //o folosesc pentru a sti de unde incep sa mut elementele, si a face mai usor recalcularile noilor limite
         if (this.position === 'd') {
             if (element.startY < this.startY + this.size / 2) {
                 setFields(element.startX, element.startY, element.startX + element.width, this.startY + this.size / 2);
                 this.border = configurationObject.endY;
                 this.isDotUp = 0;
-                // eventTarget.fire({
-                //     type: 'pushAtResize',
-                //     target: valueObject.list,
-                //     data: {
-                //         border: configurationObject.endY,
-                //         up: 0
-                //     }
-                // });
+                
             }
         } else if (this.position === 'u') {
             if (this.startY + this.size / 2 < element.startY + element.height) {
                 setFields(element.startX, this.startY + this.size / 2, element.startX + element.width, element.startY + element.height);
                 this.border = configurationObject.startY;
                 this.isDotUp = 1;
-                // eventTarget.fire({
-                //     type: 'pushAtResize',
-                //     target: valueObject.list,
-                //     data: {
-                //         border: configurationObject.startY,
-                //         up: 1
-                //     }
-                // });
+               
             }
         }
 
@@ -184,57 +190,28 @@ Resizable.prototype.resizeElement = function (valueObject) {
                 setFields(this.startX + this.size / 2, this.startY + this.size / 2, element.startX + element.width, element.startY + element.height);
                 this.border = configurationObject.startY;
                 this.isDotUp = 1;
-                // eventTarget.fire({
-                //     type: 'pushAtResize',
-                //     target: valueObject.list,
-                //     data: {
-                //         border: configurationObject.startY,
-                //         up: 1
-                //     }
-                // });
-                // setFields(this.startX + this.size / 2, this.startY + this.size / 2, element.startX + element.width, element.startY + element.height);
+                
             }
         } else if (this.position === 'ur') {
             if (this.startY + this.size / 2 < element.startY + element.height && this.startX + this.size / 2 > element.startX) {
                 setFields(element.startX, this.startY + this.size / 2, this.startX + this.size / 2, element.startY + element.height);
                 this.border = configurationObject.startY;
                 this.isDotUp = 1;
-                // eventTarget.fire({
-                //     type: 'pushAtResize',
-                //     target: valueObject.list,
-                //     data: {
-                //         border: configurationObject.startY,
-                //         up: 1
-                //     }
-                // });
+               
             }
         } else if (this.position === 'dl') {
             if (this.startX + this.size / 2 < element.startX + element.width && element.startY < this.startY + this.size / 2) {
                 setFields(this.startX + this.size / 2, element.startY, element.startX + element.width, this.startY + this.size / 2);
                 this.border = configurationObject.endY;
                 this.isDotUp = 0;
-                // eventTarget.fire({
-                //     type: 'pushAtResize',
-                //     target: valueObject.list,
-                //     data: {
-                //         border: configurationObject.endY,
-                //         up: 0
-                //     }
-                // });
+                
             }
         } else if (this.position === 'dr') {
             if (this.startX + this.size / 2 > element.startX && this.startY + this.size / 2 > element.startY) {
                 setFields(element.startX, element.startY, this.startX + this.size/2 , this.startY + this.size / 2);
                 this.border = configurationObject.endY;
                 this.isDotUp = 0;
-                // eventTarget.fire({
-                //     type: 'pushAtResize',
-                //     target: valueObject.list,
-                //     data: {
-                //         border: configurationObject.endY,
-                //         up: 0
-                //     }
-                // });
+                
             }
         }
 
@@ -242,11 +219,12 @@ Resizable.prototype.resizeElement = function (valueObject) {
 
     this.oldX = valueObject.mouseX;
     this.oldY = valueObject.mouseY;
-    // console.log(configurationObject.startY);
+    //elementul nu se redeseneaza decat daca s-a facut o redimensionare
     if (configurationObject.startX !== undefined && configurationObject.startY !== undefined && configurationObject.endX !== undefined && configurationObject.endY !== undefined) {
         this.resizing = true;
         element.draw(configurationObject);
     }
+
     dotManager.putOnElement(valueObject.container, valueObject.element);
 }
 
@@ -257,6 +235,7 @@ function SVGShape() {
 
 mixin(SVGShape.prototype, Shape.prototype);
 
+//funcita care se ocupa cu desenarea elementului pe baza unui obeict ce tine 4 intregi, capetele stanga sus si dreapta jos
 SVGShape.prototype.draw = function (confDraw) {
     if (confDraw === undefined) {
         throw new Error("Need an config object for drawing!");
@@ -269,7 +248,6 @@ SVGShape.prototype.draw = function (confDraw) {
     }
     this.startX = confDraw.startX;
     this.startY = confDraw.startY;
-    this.oldY = this.originalY;
     this.originalY = confDraw.startY;
     this.originalX = confDraw.startX;
     this.height = Math.abs(confDraw.endY - confDraw.startY);
@@ -287,7 +265,6 @@ SVGShape.prototype.draw = function (confDraw) {
     }
     this.svgPth.setAttribute('transform', 'translate(0,0)');
     if (this.translated === true) {
-        // this.svgPth.setAttribute('transform','translate('+ 0 + ',' + (this.originalY - 2*this.oldY) + ')');
         this.translated = undefined;
     }
 }
@@ -310,6 +287,9 @@ SVGShape.prototype.resize = function (dimObj) {
     this.draw(dimObj);
 }
 
+
+//functia implicita de move a elementului ce face o translatare pe axa Ox
+//translatarea se face in fucntie de pozitia curenta a elementului
 SVGShape.prototype.move = function (posObj) {
     if (posObj === undefined) {
         throw new Error("Need a config object for positioning!");
@@ -319,13 +299,6 @@ SVGShape.prototype.move = function (posObj) {
         throw new Error("can't move to a position with undefined x or y-axis position!");
     }
 
-    // this.svgPth.setAttribute('transform', 'translate(' + 0 + ',' + (posObj.y - this.originalY) + ')');
-    // console.log(posObj.y);
-    // console.log(this.originalY);
-    // let moveBy = 0;
-    // if(this.moveByOrigin !== undefined){
-    //     moveBy = this.moveByOrigin;
-    // }
     this.svgPth.setAttribute('transform', 'translate(' + 0 + ',' + (posObj.y - this.originalY) + ')');
     this.startY = posObj.y;
 }

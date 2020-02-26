@@ -49,6 +49,8 @@ function DotManager(configObj) {
     this.isCreate = false;
 }
 
+//aceasta functie sterge punctele de pe element, se apeleaza in momentul in care este schimbat focusul
+//sau in momentul in care dam click in afara oricarui element
 DotManager.prototype.removeElements = function (container) {
     for (let i = 0; i < this.dots.length; i++) {
         if (this.dots[i].length > 1) {
@@ -56,8 +58,11 @@ DotManager.prototype.removeElements = function (container) {
             this.dots[i].pop();
         }
     }
+    this.elementsOn = undefined;
 }
 
+//calculez pozitiile unde se va afla dot-ul pe element, sunt 8 pozitii posibile
+//string-urile sunt cele din conditii, fiecare semnifica o pozitie (sus,jos,stanga-sus,dreapta-sus, etc)
 DotManager.prototype.computePosition = function (stringPos, element) {
 
     let x = element.startX;
@@ -77,6 +82,9 @@ DotManager.prototype.computePosition = function (stringPos, element) {
     else { return []; }
 }
 
+//functia ce modifica pozitia tuturor punctelor
+//folosesc aceeasi functie move din elementul normal pentru a muta si punctele
+//punctele se translateaza odata cu elementul pentru ca altfel ar ramane in aer
 DotManager.prototype.moveElements = function (element) {
     if (this.dots[0].length > 1) {
         for (let i = 0; i < this.dots.length; i++) {
@@ -85,6 +93,7 @@ DotManager.prototype.moveElements = function (element) {
     }
 }
 
+//pentru a determina mai clar directia (x,y,d) -> care din cele 2 axe sau diagonala
 DotManager.prototype.computeOrientation = function (stringPos) {
     if (stringPos === 'l' || stringPos === 'r') {
         return 'x';
@@ -95,10 +104,13 @@ DotManager.prototype.computeOrientation = function (stringPos) {
     }
 }
 
+//functia ce pune punctele pe un element, functie ce actioneaza la click
+//adica in momentul in care utilizatorul a facut click pe un anumit element
 DotManager.prototype.putOnElement = function (container, element) {
 
     let size = 15;
     this.removeElements(container);
+    this.elementsOn = true;
 
     for (let i = 0; i < this.dots.length; i++) {
         let newSquare = new DotShape();
@@ -107,7 +119,7 @@ DotManager.prototype.putOnElement = function (container, element) {
         this.dots[i].push(newSquare);
         this.dots[i][1].direction = this.computeOrientation(this.dots[i][0].position);
         this.dots[i][1].position = this.dots[i][0].position;
-        // this.dots[i][1].dragDrop(container, eventObject, false);
+
         container.appendChild(this.dots[i][1].svgPth);
     }
 }
