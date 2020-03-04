@@ -4,6 +4,8 @@ function main(){
     gameBoard.displayInvaders();
     gameBoard.createShields();
     gameBoard.displayShields();
+    gameBoard.setupShip();
+    gameBoard.gameCycle();
 }
 
 main();
