@@ -15,8 +15,10 @@ function GameBoard() {
     let boardWidth = 756;
     let boardHeight = 802;
     let playerShip = undefined;
-    let keyDown = false;
+    const alienHeight = 24;
+    let aliensPerCol = [5, 5, 5, 5, 5, 5, 5, 5, 5, 5]
     let shields = [];
+    let bullets = [];
 
     this.createAliens = function () {
         for (let i = 0; i < rowsNumber; i++) {
@@ -86,19 +88,37 @@ function GameBoard() {
         }
     }
 
-    this.biggest = function(colIndex){
+    this.createAlienBullet = function () {
+        let alienBullet = BulletFactory().createBullet('alien');
+        let colInd = Math.floor(Math.random() * 10);
+        while (aliensPerCol[colInd] === 0) {
+            colInd = Math.floor(Math.random() * 10);
+        }
+        let rowIndex = aliveRows - 1;
+        while (invadersMatrix[rowIndex][colInd].display !== true) {
+            rowIndex--;
+        }
+        alienBullet.html = document.createElement('div');
+        alienBullet.html.classList.add(alienBullet.className + alienBullet.state);
+        alienBullet.html.style.top = parseInt(invadersMatrix[rowIndex][colInd].html.style.top) + invadersMatrix[rowIndex][colInd].height + 'px';
+        alienBullet.html.style.left = parseInt(invadersMatrix[rowIndex][colInd].html.style.left) + invadersMatrix[rowIndex][colInd].xP + invadersMatrix[rowIndex][colInd].width / 2 + 'px';
+        bullets.push(alienBullet);
+        board.appendChild(alienBullet.html);
+    }
+
+    this.biggest = function (colIndex) {
         let maxi = -1;
-        for(let i=0;i<aliveRows;i++){
-            if(invadersMatrix[i][colIndex].width > maxi && invadersMatrix[i][colIndex].display === true){
+        for (let i = 0; i < aliveRows; i++) {
+            if (invadersMatrix[i][colIndex].width > maxi && invadersMatrix[i][colIndex].display === true) {
                 maxi = invadersMatrix[i][colIndex].width;
             }
         }
         return maxi;
     }
 
-    this.descending = function(){
-        for(let i=0;i<aliveRows;i++){
-            for(let j=0;j<aliveCols;j++){
+    this.descending = function () {
+        for (let i = 0; i < aliveRows; i++) {
+            for (let j = 0; j < aliveCols; j++) {
                 // invadersMatrix[i][j].html.style.transform = 'translateY(' + invadersMatrix[i][j].yP + 'px)';
                 invadersMatrix[i][j].html.style.top = parseInt(invadersMatrix[i][j].html.style.top) + invadersMatrix[i][j].height + 'px';
                 // invadersMatrix[i][j].yP += invadersMatrix[i][j].height;
@@ -106,47 +126,51 @@ function GameBoard() {
         }
     }
 
+    this.checkIfCloseToRightBorder = function () {
+        let alienWidth = this.biggest(aliveCols - 1);
+        console.log(alienWidth);
+        for (let i = 0; i < aliveRows; i++) {
+            if (parseInt(invadersMatrix[i][aliveCols - 1].html.style.left) + invadersMatrix[i][aliveCols - 1].xP + alienWidth + 10 >= boardWidth) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    this.checkIfCloseToLeftBorder = function () {
+        let alienWidth = this.biggest(0);
+        for (let i = 0; i < aliveRows; i++) {
+            if (parseInt(invadersMatrix[i][0].html.style.left) + invadersMatrix[i][0].xP - 10 < 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     this.moveAliens = function () {
-        let direction = 0;
-        let goDownLeft = false;
-        let goDownRight = false;
+        let direction = 1;
+        let goDown = false;
         let oldDirection = 0;
         let timeInterval = setInterval(() => {
-            let alienWidth = this.biggest(aliveCols-1);
-
-            if (direction === 0) {
-                for (let i = 0; i < aliveRows; i++) {
-                    for (let j = aliveCols - 1; j >= 0; j--) {
-                        if(direction === oldDirection && goDownLeft === true){
-                            this.descending();
-                            goDownLeft = false;
-                        }
-                        oldDirection = direction;
-                        if (invadersMatrix[i][j].state === 1) {
-                            invadersMatrix[i][j].html.classList.remove(invadersMatrix[i][j].className + invadersMatrix[i][j].state);
-                            invadersMatrix[i][j].state++;
-                            invadersMatrix[i][j].html.classList.add(invadersMatrix[i][j].className + invadersMatrix[i][j].state);
-                        } else {
-                            invadersMatrix[i][j].html.classList.remove(invadersMatrix[i][j].className + invadersMatrix[i][j].state);
-                            invadersMatrix[i][j].state--;
-                            invadersMatrix[i][j].html.classList.add(invadersMatrix[i][j].className + invadersMatrix[i][j].state);
-                        }
-                        invadersMatrix[i][j].html.style.transform = 'translateX(' + invadersMatrix[i][j].xP + 'px)';
-                        if (parseInt(invadersMatrix[i][j].html.style.left) + invadersMatrix[i][j].xP + alienWidth + 18.7 >= boardWidth) {
-                            direction = 1 - direction;
-                            goDownRight = true;
-                        }
-                        invadersMatrix[i][j].xP += 10;
-                    }
+            if (goDown === true) {
+                this.descending();
+                goDown = false;
+            }
+            if (direction === 1) {
+                if (this.checkIfCloseToRightBorder() === true) {
+                    direction = -1;
+                    goDown = true;
                 }
             } else {
-                if(direction === oldDirection && goDownRight === true){
-                    this.descending();
-                    goDownRight = false;
+                if (this.checkIfCloseToLeftBorder() === true) {
+                    direction = 1;
+                    goDown = true;
                 }
-                oldDirection = direction;
-                for (let i = 0; i < aliveRows; i++) {
-                    for (let j = 0; j < aliveCols; j++) {
+            }
+            this.createAlienBullet();
+            for (let i = 0; i < aliveRows; i++) {
+                for (let j = aliveCols - 1; j >= 0; j--) {
+                    if (invadersMatrix[i][j].display === true) {
                         if (invadersMatrix[i][j].state === 1) {
                             invadersMatrix[i][j].html.classList.remove(invadersMatrix[i][j].className + invadersMatrix[i][j].state);
                             invadersMatrix[i][j].state++;
@@ -157,21 +181,136 @@ function GameBoard() {
                             invadersMatrix[i][j].html.classList.add(invadersMatrix[i][j].className + invadersMatrix[i][j].state);
                         }
                         invadersMatrix[i][j].html.style.transform = 'translateX(' + invadersMatrix[i][j].xP + 'px)';
-                        if (parseInt(invadersMatrix[i][j].html.style.left) + invadersMatrix[i][j].xP - 15 < 0) {
-                            oldDirection = direction;
-                            direction = 1 - direction;
-                            goDownLeft = true;
-                        }
-                        invadersMatrix[i][j].xP -= 10;
+                        invadersMatrix[i][j].xP += 10 * direction;
+                    } else if (invadersMatrix[i][j].display === 'explosion') {
+                        console.log('s');
+                        invadersMatrix[i][j].html.classList.remove(invadersMatrix[i][j].className);
+                        invadersMatrix[i][j].html.classList.add('explosion');
+                        invadersMatrix[i][j].html.style.transform = 'translateX(' + invadersMatrix[i][j].xP + 'px)';
+                        invadersMatrix[i][j].display = 'disappear';
+                    } else if (invadersMatrix[i][j].display === 'disappear') {
+                        board.removeChild(invadersMatrix[i][j].html);
+                        invadersMatrix[i][j].display = false;
                     }
                 }
             }
-
         }, 500);
+    }
+
+    this.damageOnShield = function (k) {
+        for (let i = 0; i < shields.length; i++) {
+            for (let j = 0; j < shields[i].blocks.length; j++) {
+                for (let t = 0; t < shields[i].blocks[j].length; t++) {
+                    if (shields[i].blocks[j][t].display === true) {
+                        let up = parseInt(shields[i].blocks[j][t].html.style.top);
+                        // console.log(parseInt(shields[i].blocks[j][t].html.style.top),parseInt(shields[i].html.style.top));
+                        let down = up + shields[i].blocks[j][t].height;
+                        let lft = parseInt(shields[i].blocks[j][t].html.style.left);
+                        let rght = lft + shields[i].blocks[j][t].width;
+                        let bulletLft = parseInt(bullets[k].html.style.left);
+                        let bulletBtm = parseInt(bullets[k].html.style.top);
+                        // console.log(up,down,lft,rght,bulletLft,bulletBtm);
+                        if (bulletLft >= lft && bulletLft < rght && bulletBtm >= up && bulletBtm < down && bullets[k].direction !== 0 && shields[i].blocks[j][t].display === true) {
+                            if (shields[i].blocks[j][t].hitCount + 1 < shields[i].blocks[j][t].hitLimit) {
+                                if (shields[i].blocks[j][t].hitCount === 0) {
+                                    shields[i].blocks[j][t].html.classList.remove(shields[i].blocks[j][t].className)
+                                } else {
+                                    shields[i].blocks[j][t].html.classList.remove(shields[i].blocks[j][t].className + 'Hit' + shields[i].blocks[j][t].hitCount);
+                                }
+                                shields[i].blocks[j][t].hitCount += 1;
+                                shields[i].blocks[j][t].html.classList.add(shields[i].blocks[j][t].className + 'Hit' + shields[i].blocks[j][t].hitCount);
+                            } else {
+                                shields[i].blocks[j][t].display = false;
+                                shields[i].html.removeChild(shields[i].blocks[j][t].html);
+                            }
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    this.damageOnPlayer = function (k) {
+        return playerShip.isHit(parseInt(bullets[k].html.style.left), parseInt(bullets[k].html.style.top));
+    }
+
+    this.damageOnInvaders = function (k) {
+        let bulletLft = parseInt(bullets[k].html.style.left);
+        let bulletTop = parseInt(bullets[k].html.style.top);
+        for (let i = 0; i < aliveRows; i++) {
+            for (let j = 0; j < aliveCols; j++) {
+                if (invadersMatrix[i][j].display === true) {
+                    let lft = parseInt(invadersMatrix[i][j].html.style.left) + invadersMatrix[i][j].xP;
+                    let rght = parseInt(invadersMatrix[i][j].html.style.left) + invadersMatrix[i][j].xP + invadersMatrix[i][j].width;
+                    let top = parseInt(invadersMatrix[i][j].html.style.top);
+                    let btm = parseInt(invadersMatrix[i][j].html.style.top) + invadersMatrix[i][j].height;
+                    if (lft <= bulletLft && rght >= bulletLft && top <= bulletTop && bulletTop <= btm) {
+                        // invadersMatrix[i][j].html.classList.remove(invadersMatrix[i][j].className);
+                        // invadersMatrix[i][j].html.classList.add('explosion');
+                        invadersMatrix[i][j].display = 'explosion';
+                        return true;
+                    }
+                }
+            }
+        }
+    }
+
+    this.manageBullets = function () {
+        let indexesForBulletsOut = [];
+        for (let i = 0; i < bullets.length; i++) {
+            bullets[i].html.style.top = parseInt(bullets[i].html.style.top) + bullets[i].speed * bullets[i].direction + 'px';
+            if (bullets[i].numberOfStates > 1) {
+                bullets[i].html.classList.remove(bullets[i].className + bullets[i].state);
+                if (bullets[i].state === 1) {
+                    bullets[i].state = 2;
+                } else {
+                    bullets[i].state = 1;
+                }
+                bullets[i].html.classList.add(bullets[i].className + bullets[i].state);
+            }
+            if (this.damageOnShield(i) === true) {
+                indexesForBulletsOut.push(i);
+                board.removeChild(bullets[i].html);
+                bullets[i].fired = false;
+            }
+            if (this.damageOnInvaders(i) === true) {
+                indexesForBulletsOut.push(i);
+                board.removeChild(bullets[i].html);
+                bullets[i].fired = false;
+            }
+            // if(this.damageOnPlayer(i) === true){
+            //     playerShip.deadTransition();
+            // }
+            if (parseInt(bullets[i].html.style.top) + 10 * bullets[i].direction < 0 || parseInt(bullets[i].html.style.top) + 10 * bullets[i].direction > boardHeight) {
+                // board.removeChild(bullets[i].html);
+                board.removeChild(bullets[i].html);
+                bullets[i].fired = false;
+                indexesForBulletsOut.push(i);
+            }
+        }
+        let deSc = 0;
+        for (let i = 0; i < indexesForBulletsOut.length; i++) {
+            bullets.splice(indexesForBulletsOut[i] - deSc, 1);
+            deSc++;
+        }
+    }
+
+    this.environmentChanges = function () {
+        let envInterval = setInterval(() => {
+            if (playerShip.bulletReady() === true) {
+                bullets.push(playerShip.getBullet());
+                board.appendChild(bullets[bullets.length - 1].html);
+            }
+            this.manageBullets();
+            // this.damageOnObject();
+        }, 10);
     }
 
     this.gameCycle = function () {
         this.moveAliens();
+        this.environmentChanges();
     }
 
     this.displayShields = function () {
