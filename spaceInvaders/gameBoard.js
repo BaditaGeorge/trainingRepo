@@ -19,6 +19,7 @@ function GameBoard() {
     let aliensPerCol = [5, 5, 5, 5, 5, 5, 5, 5, 5, 5]
     let shields = [];
     let bullets = [];
+    let intervalContor = 0;
 
     this.createAliens = function () {
         for (let i = 0; i < rowsNumber; i++) {
@@ -147,54 +148,51 @@ function GameBoard() {
         return false;
     }
 
-    this.moveAliens = function () {
-        let direction = 1;
-        let goDown = false;
-        let oldDirection = 0;
-        let timeInterval = setInterval(() => {
-            if (goDown === true) {
-                this.descending();
-                goDown = false;
+    this.moveAliens = function (direction, goDown) {
+        if (goDown === true) {
+            this.descending();
+            goDown = false;
+        }
+        if (direction === 1) {
+            if (this.checkIfCloseToRightBorder() === true) {
+                direction = -1;
+                goDown = true;
             }
-            if (direction === 1) {
-                if (this.checkIfCloseToRightBorder() === true) {
-                    direction = -1;
-                    goDown = true;
-                }
-            } else {
-                if (this.checkIfCloseToLeftBorder() === true) {
-                    direction = 1;
-                    goDown = true;
-                }
+        } else {
+            if (this.checkIfCloseToLeftBorder() === true) {
+                direction = 1;
+                goDown = true;
             }
-            this.createAlienBullet();
-            for (let i = 0; i < aliveRows; i++) {
-                for (let j = aliveCols - 1; j >= 0; j--) {
-                    if (invadersMatrix[i][j].display === true) {
-                        if (invadersMatrix[i][j].state === 1) {
-                            invadersMatrix[i][j].html.classList.remove(invadersMatrix[i][j].className + invadersMatrix[i][j].state);
-                            invadersMatrix[i][j].state++;
-                            invadersMatrix[i][j].html.classList.add(invadersMatrix[i][j].className + invadersMatrix[i][j].state);
-                        } else {
-                            invadersMatrix[i][j].html.classList.remove(invadersMatrix[i][j].className + invadersMatrix[i][j].state);
-                            invadersMatrix[i][j].state--;
-                            invadersMatrix[i][j].html.classList.add(invadersMatrix[i][j].className + invadersMatrix[i][j].state);
-                        }
-                        invadersMatrix[i][j].html.style.transform = 'translateX(' + invadersMatrix[i][j].xP + 'px)';
-                        invadersMatrix[i][j].xP += 10 * direction;
-                    } else if (invadersMatrix[i][j].display === 'explosion') {
-                        console.log('s');
-                        invadersMatrix[i][j].html.classList.remove(invadersMatrix[i][j].className);
-                        invadersMatrix[i][j].html.classList.add('explosion');
-                        invadersMatrix[i][j].html.style.transform = 'translateX(' + invadersMatrix[i][j].xP + 'px)';
-                        invadersMatrix[i][j].display = 'disappear';
-                    } else if (invadersMatrix[i][j].display === 'disappear') {
-                        board.removeChild(invadersMatrix[i][j].html);
-                        invadersMatrix[i][j].display = false;
+        }
+        this.createAlienBullet();
+        for (let i = 0; i < aliveRows; i++) {
+            for (let j = aliveCols - 1; j >= 0; j--) {
+                if (invadersMatrix[i][j].display === true) {
+                    if (invadersMatrix[i][j].state === 1) {
+                        invadersMatrix[i][j].html.classList.remove(invadersMatrix[i][j].className + invadersMatrix[i][j].state);
+                        invadersMatrix[i][j].state++;
+                        invadersMatrix[i][j].html.classList.add(invadersMatrix[i][j].className + invadersMatrix[i][j].state);
+                    } else {
+                        invadersMatrix[i][j].html.classList.remove(invadersMatrix[i][j].className + invadersMatrix[i][j].state);
+                        invadersMatrix[i][j].state--;
+                        invadersMatrix[i][j].html.classList.add(invadersMatrix[i][j].className + invadersMatrix[i][j].state);
                     }
+                    invadersMatrix[i][j].html.style.transform = 'translateX(' + invadersMatrix[i][j].xP + 'px)';
+                    invadersMatrix[i][j].xP += 10 * direction;
+                } else if (invadersMatrix[i][j].display === 'explosion') {
+                    console.log('s');
+                    invadersMatrix[i][j].html.classList.remove(invadersMatrix[i][j].className + invadersMatrix[i][j].state);
+                    invadersMatrix[i][j].html.classList.add('explosion');
+                    console.log(invadersMatrix[i][j].html.classList);
+                    invadersMatrix[i][j].html.style.transform = 'translateX(' + invadersMatrix[i][j].xP + 'px)';
+                    invadersMatrix[i][j].display = 'disappear';
+                } else if (invadersMatrix[i][j].display === 'disappear') {
+                    board.removeChild(invadersMatrix[i][j].html);
+                    invadersMatrix[i][j].display = false;
                 }
             }
-        }, 500);
+        }
+        return [direction,goDown];
     }
 
     this.damageOnShield = function (k) {
@@ -298,12 +296,20 @@ function GameBoard() {
     }
 
     this.environmentChanges = function () {
+        let direction = 1;
+        let goDown = false;
+        let oldDirection = 0;
         let envInterval = setInterval(() => {
             if (playerShip.bulletReady() === true) {
                 bullets.push(playerShip.getBullet());
                 board.appendChild(bullets[bullets.length - 1].html);
             }
             this.manageBullets();
+            intervalContor += 1;
+            if (intervalContor === 49) {
+                intervalContor = 0;
+                [direction,goDown] = this.moveAliens(direction,goDown);
+            }
             // this.damageOnObject();
         }, 10);
     }
