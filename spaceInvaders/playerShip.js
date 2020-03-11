@@ -19,7 +19,10 @@ function PlayerShip(board, leftLimit, rightLimit) {
     }
 
     this.removeShip = function(){
-        board.removeChild(playerShip.html);
+        if(playerShip.html !== undefined){
+            // playerShip.html.display = 'none';
+            board.removeChild(playerShip.html);
+        }
     }
 
     this.died = function(){
