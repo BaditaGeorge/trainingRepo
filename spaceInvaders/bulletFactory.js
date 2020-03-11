@@ -10,7 +10,7 @@ function BulletFactory(){
                 yP:0,
                 state:1,
                 numberOfStates:2,
-                fired:false,
+                fired:true,
                 speed:3
             };
         }else if(type === 'player'){

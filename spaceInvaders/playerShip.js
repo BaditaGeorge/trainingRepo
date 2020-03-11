@@ -1,7 +1,10 @@
-function PlayerShip(board,leftLimit,rightLimit) {
+function PlayerShip(board, leftLimit, rightLimit) {
     let playerShip;
     let bullet = BulletFactory().createBullet('player');
     let bulletIsReady = false;
+    let isDying = 3;
+    let num = 0;
+    let sound = document.createElement('audio');
 
     function createPlayerShipObject() {
         return {
@@ -15,6 +18,18 @@ function PlayerShip(board,leftLimit,rightLimit) {
         };
     }
 
+    this.removeShip = function(){
+        board.removeChild(playerShip.html);
+    }
+
+    this.died = function(){
+        console.log(playerShip.hitCount,playerShip.hitLimit);
+        if(playerShip.hitCount === playerShip.hitLimit){
+            return true;
+        }
+        return false;
+    }
+
     this.createShip = function () {
         playerShip = createPlayerShipObject();
         playerShip.html = document.createElement('div');
@@ -22,115 +37,142 @@ function PlayerShip(board,leftLimit,rightLimit) {
         playerShip.html.style.top = '750px';
         playerShip.html.style.left = '400px';
         playerShip.xP = 0;
+        sound.src = './sounds/shoot.wav';
+        sound.setAttribute('preload','auto');
+        sound.setAttribute('controls','none');
+        sound.style.display = 'none';
+        document.body.appendChild(sound);
     }
 
-    this.fireRequest = function(){
-        if(bullet.fired === false){
+    this.fireRequest = function () {
+        if (bullet.fired === false) {
             return true;
         }
         return false;
     }
 
-    this.createBullet = function(){
+    this.createBullet = function () {
         bulletIsReady = true;
         bullet.html = undefined;
         bullet.fired = true;
         bullet.html = document.createElement('div');
         bullet.yP = 0;
-        bullet.html.style.left = parseInt(playerShip.html.style.left) + playerShip.xP + playerShip.width/2 + 'px';
+        bullet.html.style.left = parseInt(playerShip.html.style.left) + playerShip.xP + playerShip.width / 2 + 'px';
         bullet.html.style.top = parseInt(playerShip.html.style.top) - playerShip.height + 'px';
         bullet.html.classList.add(bullet.className);
+        sound.play();
     }
 
-    this.getBullet = function(){
+    this.getBullet = function () {
         bulletIsReady = false;
         return bullet;
     }
 
-    this.bulletReady = function(){
+    this.bulletReady = function () {
         return bulletIsReady;
     }
 
-    this.getShipPosition = function(){
+    this.getShipPosition = function () {
         return parseInt(playerShip.html.style.left) + playerShip.xP;
     }
 
-    this.displayShip = function(){
+    this.displayShip = function () {
         board.appendChild(playerShip.html);
         this.controlShip();
     }
 
-    this.isHit = function(bulletLft,bulletTop){
+    this.isHit = function (bulletLft, bulletTop) {
         let lft = parseInt(playerShip.html.style.left) + playerShip.xP;
         let rght = parseInt(playerShip.html.style.left) + playerShip.xP + playerShip.width;
         let top = parseInt(playerShip.html.style.top);
         let btm = parseInt(playerShip.html.style.top) + playerShip.height;
-        if(bulletLft >= lft && bulletLft <= rght && bulletTop >= top && bulletTop <= btm){
+        if (bulletLft >= lft && bulletLft <= rght && bulletTop >= top && bulletTop <= btm) {
             return true;
         }
         return false;
     }
 
-    this.deadTransition = function(){
-        playerShip.html.classList.remove(playerShip.className);
-        for(let i=0;i<2;i++){
-            if(i>0){
-                playerShip.html.classList.remove(playerShip.className + 'Dead' + i);
-            }
-            playerShip.html.classList.add(playerShip.className + 'Dead' + (i+1));
-        }
+    this.deadTransition = function () {
+        isDying = 0;
+        playerShip.hitCount += 1;
+        // playerShip.html.classList.remove(playerShip.className);
+        // for(let i=0;i<2;i++){
+        //     if(i>0){
+        //         playerShip.html.classList.remove(playerShip.className + 'Dead' + i);
+        //     }
+        //     playerShip.html.classList.add(playerShip.className + 'Dead' + (i+1));
+        // }
     }
 
-    this.controlShip = function(){
+    this.controlShip = function () {
         let keyDown = false;
         let timeOut = undefined;
         let keyD = undefined;
 
-        let redrawFunction = ()=>{
-            if(keyDown === true){
-                requestAnimationFrame(()=>{
+        let redrawFunction = () => {
+            if (keyDown === true) {
+                requestAnimationFrame(() => {
                     playerShip.html.style.transform = 'translateX(' + playerShip.xP + 'px)';
                     redrawFunction();
                 });
             }
         }
 
-        let intervalFunction = ()=>{
-            if(keyDown === true){
-                let toAdd = 0;
-                if(keyD === 'ArrowRight'){
-                    toAdd = 5;
-                }else if(keyD === 'ArrowLeft'){
-                    toAdd -= 5;
+        let intervalFunction = () => {
+            if (isDying > 2) {
+                if (keyDown === true) {
+                    let toAdd = 0;
+                    if (keyD === 'ArrowRight') {
+                        toAdd = 5;
+                    } else if (keyD === 'ArrowLeft') {
+                        toAdd -= 5;
+                    }
+                    if (playerShip.xP + toAdd >= leftLimit && playerShip.xP + toAdd < rightLimit) {
+                        playerShip.xP += toAdd;
+                        playerShip.html.style.transform = 'translateX(' + playerShip.xP + 'px)';
+                    }
                 }
-                if(playerShip.xP + toAdd >= leftLimit && playerShip.xP + toAdd < rightLimit){
-                    playerShip.xP += toAdd;
-                    playerShip.html.style.transform = 'translateX(' + playerShip.xP + 'px)';
+            } else {
+                num++;
+                if (num === 10) {
+                    isDying++;
+                    if (isDying <= 2) {
+                        if (isDying === 1) {
+                            playerShip.html.classList.remove(playerShip.className);
+                        } else {
+                            playerShip.html.classList.remove(playerShip.className + 'Dead' + (isDying - 1));
+                        }
+                        playerShip.html.classList.add(playerShip.className + 'Dead' + isDying);
+                    } else {
+                        playerShip.html.classList.remove(playerShip.className + 'Dead' + (isDying - 1));
+                        playerShip.html.classList.add(playerShip.className);
+                    }
+                    num = 0;
                 }
             }
         }
 
-        document.body.addEventListener('keydown',(e)=>{
-            if(e.key === 'ArrowLeft'){
+        document.body.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') {
                 keyDown = true;
                 keyD = e.key;
-            }else if(e.key === 'ArrowRight'){
+            } else if (e.key === 'ArrowRight') {
                 keyDown = true;
                 keyD = e.key;
-            }else if(e.key === ' '){
-                if(this.fireRequest() === true){
+            } else if (e.key === ' ') {
+                if (this.fireRequest() === true) {
                     this.createBullet();
                 }
             }
-            if(timeOut === undefined){
-                timeOut = setInterval(intervalFunction,10);
+            if (timeOut === undefined) {
+                timeOut = setInterval(intervalFunction, 10);
             }
         });
 
-        document.body.addEventListener('keyup',(e)=>{
+        document.body.addEventListener('keyup', (e) => {
             keyDown = false;
-            clearInterval(timeOut);
-            timeOut = undefined;
+            // clearInterval(timeOut);
+            // timeOut = undefined;
         });
     }
 

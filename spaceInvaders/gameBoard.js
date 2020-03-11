@@ -6,7 +6,7 @@ function GameBoard() {
     const rowsNumber = numberOfInvaders / invadersOnRow;
     let alienBlockSize = 50;
     let invadersMatrix = [];
-    const board = document.getElementsByClassName('board')[0];
+    let board = document.getElementsByClassName('board')[0];
     let shieldsRows = 4;
     let shieldCols = 3;
     let numberOfShields = 4;
@@ -19,9 +19,14 @@ function GameBoard() {
     let aliensPerCol = [5, 5, 5, 5, 5, 5, 5, 5, 5, 5]
     let shields = [];
     let bullets = [];
+    let aliveColsLeft = 0;
     let intervalContor = 0;
+    let sound = document.createElement('audio');
 
     this.createAliens = function () {
+        sound.src = './sounds/explosion.wav';
+        sound.setAttribute('preload', 'auto');
+        sound.setAttribute('controls', 'none');
         for (let i = 0; i < rowsNumber; i++) {
             invadersMatrix.push([]);
             for (let j = 0; j < invadersOnRow; j++) {
@@ -119,7 +124,7 @@ function GameBoard() {
 
     this.descending = function () {
         for (let i = 0; i < aliveRows; i++) {
-            for (let j = 0; j < aliveCols; j++) {
+            for (let j = aliveColsLeft; j < aliveCols; j++) {
                 // invadersMatrix[i][j].html.style.transform = 'translateY(' + invadersMatrix[i][j].yP + 'px)';
                 invadersMatrix[i][j].html.style.top = parseInt(invadersMatrix[i][j].html.style.top) + invadersMatrix[i][j].height + 'px';
                 // invadersMatrix[i][j].yP += invadersMatrix[i][j].height;
@@ -141,14 +146,14 @@ function GameBoard() {
     this.checkIfCloseToLeftBorder = function () {
         let alienWidth = this.biggest(0);
         for (let i = 0; i < aliveRows; i++) {
-            if (parseInt(invadersMatrix[i][0].html.style.left) + invadersMatrix[i][0].xP - 10 < 0) {
+            if (parseInt(invadersMatrix[i][aliveColsLeft].html.style.left) + invadersMatrix[i][aliveColsLeft].xP - 10 < 0) {
                 return true;
             }
         }
         return false;
     }
 
-    this.moveAliens = function (direction, goDown) {
+    this.moveAliens = function (direction, goDown, limit) {
         if (goDown === true) {
             this.descending();
             goDown = false;
@@ -157,16 +162,18 @@ function GameBoard() {
             if (this.checkIfCloseToRightBorder() === true) {
                 direction = -1;
                 goDown = true;
+                limit -= 2;
             }
         } else {
             if (this.checkIfCloseToLeftBorder() === true) {
                 direction = 1;
                 goDown = true;
+                limit -= 2;
             }
         }
         this.createAlienBullet();
         for (let i = 0; i < aliveRows; i++) {
-            for (let j = aliveCols - 1; j >= 0; j--) {
+            for (let j = aliveCols - 1; j >= aliveColsLeft; j--) {
                 if (invadersMatrix[i][j].display === true) {
                     if (invadersMatrix[i][j].state === 1) {
                         invadersMatrix[i][j].html.classList.remove(invadersMatrix[i][j].className + invadersMatrix[i][j].state);
@@ -179,20 +186,26 @@ function GameBoard() {
                     }
                     invadersMatrix[i][j].html.style.transform = 'translateX(' + invadersMatrix[i][j].xP + 'px)';
                     invadersMatrix[i][j].xP += 10 * direction;
-                } else if (invadersMatrix[i][j].display === 'explosion') {
-                    console.log('s');
-                    invadersMatrix[i][j].html.classList.remove(invadersMatrix[i][j].className + invadersMatrix[i][j].state);
-                    invadersMatrix[i][j].html.classList.add('explosion');
-                    console.log(invadersMatrix[i][j].html.classList);
-                    invadersMatrix[i][j].html.style.transform = 'translateX(' + invadersMatrix[i][j].xP + 'px)';
-                    invadersMatrix[i][j].display = 'disappear';
                 } else if (invadersMatrix[i][j].display === 'disappear') {
                     board.removeChild(invadersMatrix[i][j].html);
                     invadersMatrix[i][j].display = false;
+                    if (aliensPerCol[j] === 0) {
+                        if (j === aliveCols - 1) {
+                            aliveCols--;
+                            while (aliensPerCol[aliveCols - 1] === 0) {
+                                aliveCols--;
+                            }
+                        } else if (j === aliveColsLeft) {
+                            aliveColsLeft++;
+                            while (aliensPerCol[aliveColsLeft] === 0) {
+                                aliveColsLeft++;
+                            }
+                        }
+                    }
                 }
             }
         }
-        return [direction,goDown];
+        return [direction, goDown, limit];
     }
 
     this.damageOnShield = function (k) {
@@ -211,7 +224,7 @@ function GameBoard() {
                         if (bulletLft >= lft && bulletLft < rght && bulletBtm >= up && bulletBtm < down && bullets[k].direction !== 0 && shields[i].blocks[j][t].display === true) {
                             if (shields[i].blocks[j][t].hitCount + 1 < shields[i].blocks[j][t].hitLimit) {
                                 if (shields[i].blocks[j][t].hitCount === 0) {
-                                    shields[i].blocks[j][t].html.classList.remove(shields[i].blocks[j][t].className)
+                                    shields[i].blocks[j][t].html.classList.remove(shields[i].blocks[j][t].className);
                                 } else {
                                     shields[i].blocks[j][t].html.classList.remove(shields[i].blocks[j][t].className + 'Hit' + shields[i].blocks[j][t].hitCount);
                                 }
@@ -231,14 +244,18 @@ function GameBoard() {
     }
 
     this.damageOnPlayer = function (k) {
-        return playerShip.isHit(parseInt(bullets[k].html.style.left), parseInt(bullets[k].html.style.top));
+        console.log(bullets[k]);
+        if(bullets[k].fired === true){
+            console.log('a');
+            return playerShip.isHit(parseInt(bullets[k].html.style.left), parseInt(bullets[k].html.style.top));
+        }
     }
 
     this.damageOnInvaders = function (k) {
         let bulletLft = parseInt(bullets[k].html.style.left);
         let bulletTop = parseInt(bullets[k].html.style.top);
         for (let i = 0; i < aliveRows; i++) {
-            for (let j = 0; j < aliveCols; j++) {
+            for (let j = aliveColsLeft; j < aliveCols; j++) {
                 if (invadersMatrix[i][j].display === true) {
                     let lft = parseInt(invadersMatrix[i][j].html.style.left) + invadersMatrix[i][j].xP;
                     let rght = parseInt(invadersMatrix[i][j].html.style.left) + invadersMatrix[i][j].xP + invadersMatrix[i][j].width;
@@ -247,7 +264,12 @@ function GameBoard() {
                     if (lft <= bulletLft && rght >= bulletLft && top <= bulletTop && bulletTop <= btm) {
                         // invadersMatrix[i][j].html.classList.remove(invadersMatrix[i][j].className);
                         // invadersMatrix[i][j].html.classList.add('explosion');
-                        invadersMatrix[i][j].display = 'explosion';
+                        invadersMatrix[i][j].html.classList.remove(invadersMatrix[i][j].className + invadersMatrix[i][j].state);
+                        invadersMatrix[i][j].html.classList.add('explosion');
+                        sound.play();
+                        invadersMatrix[i][j].html.style.transform = 'translateX(' + invadersMatrix[i][j].xP + 'px)';
+                        invadersMatrix[i][j].display = 'disappear';
+                        aliensPerCol[j]--;
                         return true;
                     }
                 }
@@ -278,10 +300,12 @@ function GameBoard() {
                 board.removeChild(bullets[i].html);
                 bullets[i].fired = false;
             }
-            // if(this.damageOnPlayer(i) === true){
-            //     playerShip.deadTransition();
-            // }
-            if (parseInt(bullets[i].html.style.top) + 10 * bullets[i].direction < 0 || parseInt(bullets[i].html.style.top) + 10 * bullets[i].direction > boardHeight) {
+            if (this.damageOnPlayer(i) === true) {
+                // board.removeChild(bullets[i].html);
+                bullets[i].fired = false;
+                playerShip.deadTransition();
+            }
+            if (parseInt(bullets[i].html.style.top) + 10 * bullets[i].direction < 0 || parseInt(bullets[i].html.style.top) + 10 * bullets[i].direction > boardHeight - 30) {
                 // board.removeChild(bullets[i].html);
                 board.removeChild(bullets[i].html);
                 bullets[i].fired = false;
@@ -295,20 +319,43 @@ function GameBoard() {
         }
     }
 
+    this.destroy = function(){
+        playerShip.removeShip();
+        for(let i=0;i<invadersMatrix.length;i++){
+            for(let j=0;j<invadersMatrix[i].length;j++){
+                if(invadersMatrix[i][j].display === true){
+                    board.removeChild(invadersMatrix[i][j].html);
+                }
+            }
+        }
+        for(let i=0;i<bullets.length;i++){
+            board.removeChild(bullets[i].html);
+        }
+    }
+
     this.environmentChanges = function () {
         let direction = 1;
         let goDown = false;
         let oldDirection = 0;
+        let moveAt = 49;
         let envInterval = setInterval(() => {
+            if(playerShip.died() === true){
+                this.destroy();
+                this.createAliens();
+                this.displayInvaders();
+                this.createShields();
+                this.displayShields();
+                this.setupShip();
+            }
             if (playerShip.bulletReady() === true) {
                 bullets.push(playerShip.getBullet());
                 board.appendChild(bullets[bullets.length - 1].html);
             }
             this.manageBullets();
             intervalContor += 1;
-            if (intervalContor === 49) {
+            if (intervalContor === moveAt) {
                 intervalContor = 0;
-                [direction,goDown] = this.moveAliens(direction,goDown);
+                [direction, goDown, moveAt] = this.moveAliens(direction, goDown, moveAt);
             }
             // this.damageOnObject();
         }, 10);
