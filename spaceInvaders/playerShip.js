@@ -18,22 +18,21 @@ function PlayerShip(board, leftLimit, rightLimit) {
         };
     }
 
-    this.removeShip = function(){
-        if(playerShip.html !== undefined){
-            // playerShip.html.display = 'none';
+    this.removeShip = function() {
+        if (playerShip.html !== undefined) {
             board.removeChild(playerShip.html);
         }
     }
 
-    this.died = function(){
-        console.log(playerShip.hitCount,playerShip.hitLimit);
-        if(playerShip.hitCount === playerShip.hitLimit){
+    this.died = function() {
+        console.log(playerShip.hitCount, playerShip.hitLimit);
+        if (playerShip.hitCount === playerShip.hitLimit) {
             return true;
         }
         return false;
     }
 
-    this.createShip = function () {
+    this.createShip = function() {
         playerShip = createPlayerShipObject();
         playerShip.html = document.createElement('div');
         playerShip.html.classList.add(playerShip.className);
@@ -41,20 +40,20 @@ function PlayerShip(board, leftLimit, rightLimit) {
         playerShip.html.style.left = '400px';
         playerShip.xP = 0;
         sound.src = './sounds/shoot.wav';
-        sound.setAttribute('preload','auto');
-        sound.setAttribute('controls','none');
+        sound.setAttribute('preload', 'auto');
+        sound.setAttribute('controls', 'none');
         sound.style.display = 'none';
         document.body.appendChild(sound);
     }
 
-    this.fireRequest = function () {
+    this.fireRequest = function() {
         if (bullet.fired === false) {
             return true;
         }
         return false;
     }
 
-    this.createBullet = function () {
+    this.createBullet = function() {
         bulletIsReady = true;
         bullet.html = undefined;
         bullet.fired = true;
@@ -66,25 +65,25 @@ function PlayerShip(board, leftLimit, rightLimit) {
         sound.play();
     }
 
-    this.getBullet = function () {
+    this.getBullet = function() {
         bulletIsReady = false;
         return bullet;
     }
 
-    this.bulletReady = function () {
+    this.bulletReady = function() {
         return bulletIsReady;
     }
 
-    this.getShipPosition = function () {
+    this.getShipPosition = function() {
         return parseInt(playerShip.html.style.left) + playerShip.xP;
     }
 
-    this.displayShip = function () {
+    this.displayShip = function() {
         board.appendChild(playerShip.html);
         this.controlShip();
     }
 
-    this.isHit = function (bulletLft, bulletTop) {
+    this.isHit = function(bulletLft, bulletTop) {
         let lft = parseInt(playerShip.html.style.left) + playerShip.xP;
         let rght = parseInt(playerShip.html.style.left) + playerShip.xP + playerShip.width;
         let top = parseInt(playerShip.html.style.top);
@@ -95,19 +94,12 @@ function PlayerShip(board, leftLimit, rightLimit) {
         return false;
     }
 
-    this.deadTransition = function () {
+    this.deadTransition = function() {
         isDying = 0;
         playerShip.hitCount += 1;
-        // playerShip.html.classList.remove(playerShip.className);
-        // for(let i=0;i<2;i++){
-        //     if(i>0){
-        //         playerShip.html.classList.remove(playerShip.className + 'Dead' + i);
-        //     }
-        //     playerShip.html.classList.add(playerShip.className + 'Dead' + (i+1));
-        // }
     }
 
-    this.controlShip = function () {
+    this.controlShip = function() {
         let keyDown = false;
         let timeOut = undefined;
         let keyD = undefined;
@@ -155,6 +147,8 @@ function PlayerShip(board, leftLimit, rightLimit) {
             }
         }
 
+        timeOut = setInterval(intervalFunction, 10);
+
         document.body.addEventListener('keydown', (e) => {
             if (e.key === 'ArrowLeft') {
                 keyDown = true;
@@ -167,15 +161,10 @@ function PlayerShip(board, leftLimit, rightLimit) {
                     this.createBullet();
                 }
             }
-            if (timeOut === undefined) {
-                timeOut = setInterval(intervalFunction, 10);
-            }
         });
 
         document.body.addEventListener('keyup', (e) => {
             keyDown = false;
-            // clearInterval(timeOut);
-            // timeOut = undefined;
         });
     }
 

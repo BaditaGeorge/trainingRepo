@@ -7,7 +7,7 @@ function ListView(container, dotConfig) {
 }
 
 
-ListView.prototype.addElement = function (confObj) {
+ListView.prototype.addElement = function(confObj) {
     if (this.elements === undefined) {
         this.elements = [];
     }
@@ -32,7 +32,7 @@ ListView.prototype.addElement = function (confObj) {
 
 }
 
-ListView.prototype.reorder = function () {
+ListView.prototype.reorder = function() {
     let firstDropY = this.inferiorLimit;
     let indexOf;
     let lastDropIndex;
@@ -41,7 +41,7 @@ ListView.prototype.reorder = function () {
         return;
     }
     let tempDropY = this.element.dropY;
-    
+
     if (this.up === 0) {
 
         firstDropY = this.lastLimit;
@@ -75,7 +75,7 @@ ListView.prototype.reorder = function () {
         for (let i = 0; i < this.elements.length; i++) {
             if (this.elements[i] !== this.element) {
                 if (this.elements[i].dropY < tempDropY && (this.elements[i].dropY + this.elements[i].height > this.element.startY + this.element.height ||
-                     (this.elements[i].dropY > this.element.startY && this.elements[i].height < this.element.height))) {
+                        (this.elements[i].dropY > this.element.startY && this.elements[i].height < this.element.height))) {
                     if (firstToMove === false) {
                         firstDropY += (this.element.height + this.padding);
                         this.element.dropY = this.elements[i].dropY;
@@ -98,7 +98,7 @@ ListView.prototype.reorder = function () {
 }
 
 
-ListView.prototype.checkHitBox = function (svgPth, positionY, dropY, height) {
+ListView.prototype.checkHitBox = function(svgPth, positionY, dropY, height) {
 
     let bounderies = [];
     let len = this.elements.length;
@@ -115,8 +115,8 @@ ListView.prototype.checkHitBox = function (svgPth, positionY, dropY, height) {
     }
 
     for (let i = 0; i < bounderies.length; i++) {
-        if ((bounderies[i].up < positionY && positionY + height > bounderies[i].down && positionY + height < bounderies[i].down + bounderies[i].h2)
-            || (bounderies[i].up > positionY && positionY + height > bounderies[i].up && positionY + height < bounderies[i].down)) {
+        if ((bounderies[i].up < positionY && positionY + height > bounderies[i].down && positionY + height < bounderies[i].down + bounderies[i].h2) ||
+            (bounderies[i].up > positionY && positionY + height > bounderies[i].up && positionY + height < bounderies[i].down)) {
             if (dropY < bounderies[i].up) {
                 return [(bounderies[i].up + this.padding / 2), 0];
             } else {
@@ -128,7 +128,8 @@ ListView.prototype.checkHitBox = function (svgPth, positionY, dropY, height) {
     return [-1];
 }
 
-ListView.prototype.addLine = function (positionY) {
+
+ListView.prototype.addLine = function(positionY) {
     this.straightLine = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     let positionX = 0;
     this.lineY = positionY;
@@ -146,14 +147,14 @@ ListView.prototype.addLine = function (positionY) {
     this.container.appendChild(this.straightLine);
 }
 
-ListView.prototype.removeLine = function () {
+ListView.prototype.removeLine = function() {
     if (this.straightLine !== undefined) {
         this.container.removeChild(this.straightLine);
         this.straightLine = undefined;
     }
 }
 
-ListView.prototype.addListeners = function () {
+ListView.prototype.addListeners = function() {
     let indexOfElement = (target) => {
         for (let i = 0; i < this.elements.length; i++) {
             if (this.elements[i].svgPth === target) {
@@ -177,8 +178,10 @@ ListView.prototype.addListeners = function () {
     this.mouseDown = false;
     this.target;
 
+    this.nr = 0;
     this.container.addEventListener('mousedown', (e) => {
         let indexOfOcc = indexOfElement(e.target);
+        this.clickedEl = e.target;
 
         if (indexOfOcc !== -1) {
             this.target = this.elements[indexOfOcc].svgPth;
@@ -186,7 +189,10 @@ ListView.prototype.addListeners = function () {
             this.container.removeChild(this.element.svgPth);
 
             this.container.appendChild(this.element.svgPth);
-            this.dotManager.putOnElement(this.container, this.element);
+            if (this.nr === 0) {
+                this.dotManager.putOnElement(this.container, this.element);
+            }
+            this.nr++;
         } else {
             let indexOf = indexOfDot(e.target);
             if (indexOf !== -1) {
@@ -202,8 +208,7 @@ ListView.prototype.addListeners = function () {
                             list: this
                         }
                     },
-                    eventDrop: {
-                    }
+                    eventDrop: {}
                 }, false);
             } else {
                 if (this.dotManager.elementsOn !== undefined) {
@@ -215,21 +220,21 @@ ListView.prototype.addListeners = function () {
     });
 
     this.container.addEventListener('mouseup', (e) => {
-        if (indexOfElement(e.target) !== -1) {
-            this.mouseDown = false;
+        this.mouseDown = false;
+        if (indexOfElement(this.clickedEl) !== -1) {
             this.target = undefined;
             this.dotManager.moveElements(this.element);
             this.removeLine();
 
         } else {
-            let indexOf = indexOfDot(e.target);
+            let indexOf = indexOfDot(this.clickedEl);
             if (indexOf !== -1) {
-                eventTarget.removeListener('resize', this.dotManager.dots[indexOf][1].resizeElement);
+                eventTarget.removeListener('resize');
             }
         }
     });
 
-    this.noDotClicked = function () {
+    this.noDotClicked = function() {
         if (this.dotManager.dots[0][1] === undefined) {
             return true;
         }
@@ -255,7 +260,9 @@ ListView.prototype.addListeners = function () {
                     this.removeLine();
                 }
 
-                this.dotManager.moveElements(this.element);
+                if (indexOfElement(this.clickedEl) !== -1) {
+                    this.dotManager.moveElements(this.element);
+                }
             }
         }
     });
@@ -264,7 +271,7 @@ ListView.prototype.addListeners = function () {
     eventTarget.addListener('pushAtResize', this.pushElements);
 }
 
-ListView.prototype.pushElements = function (configObject) {
+ListView.prototype.pushElements = function(configObject) {
     let border = configObject.border;
     let up = configObject.up;
 
@@ -288,18 +295,15 @@ ListView.prototype.pushElements = function (configObject) {
     this.lastLimit = this.elements[this.elements.length - 1].dropY + this.elements[this.elements.length - 1].height + this.padding;
 }
 
-ListView.prototype.removeElement = function (index) {
+ListView.prototype.removeElement = function(index) {
     this.container.removeChild(this.elements[index].svgPth);
     this.elements.splice(index, 1);
 }
 
-ListView.prototype.setPadding = function (value) {
+ListView.prototype.setPadding = function(value) {
     this.padding = value;
 }
 
-ListView.prototype.setDotManagerConfig = function (configObject) {
+ListView.prototype.setDotManagerConfig = function(configObject) {
     this.dotManager.create(configObject);
 }
-
-
-

@@ -15,15 +15,14 @@ function GameBoard() {
     let boardWidth = 756;
     let boardHeight = 802;
     let playerShip = undefined;
-    const alienHeight = 24;
-    let aliensPerCol = [5, 5, 5, 5, 5, 5, 5, 5, 5, 5]
+    let aliensPerCol = [5, 5, 5, 5, 5, 5, 5, 5, 5, 5];
     let shields = [];
     let bullets = [];
     let aliveColsLeft = 0;
     let intervalContor = 0;
     let sound = document.createElement('audio');
 
-    this.createAliens = function () {
+    this.createAliens = function() {
         aliveRows = 5;
         aliveCols = 10;
         invadersMatrix = [];
@@ -56,7 +55,7 @@ function GameBoard() {
         // console.log(invadersMatrix);
     }
 
-    this.createShields = function () {
+    this.createShields = function() {
         let deplasare = 0;
         shields = [];
         for (let i = 0; i < numberOfShields; i++) {
@@ -89,7 +88,7 @@ function GameBoard() {
         }
     }
 
-    this.displayInvaders = function () {
+    this.displayInvaders = function() {
         // invadersMatrix[0][0].html.style.left = '5px';
         // invadersMatrix[0][0].html.style.top = '5px';
         // document.body.getElementsByClassName('board')[0].appendChild(invadersMatrix[0][0].html);
@@ -100,7 +99,7 @@ function GameBoard() {
         }
     }
 
-    this.createAlienBullet = function () {
+    this.createAlienBullet = function() {
         let alienBullet = BulletFactory().createBullet('alien');
         let colInd = Math.floor(Math.random() * 10);
         while (aliensPerCol[colInd] === 0) {
@@ -118,7 +117,7 @@ function GameBoard() {
         board.appendChild(alienBullet.html);
     }
 
-    this.biggest = function (colIndex) {
+    this.biggest = function(colIndex) {
         let maxi = -1;
         for (let i = 0; i < aliveRows; i++) {
             if (invadersMatrix[i][colIndex].width > maxi && invadersMatrix[i][colIndex].display === true) {
@@ -128,17 +127,15 @@ function GameBoard() {
         return maxi;
     }
 
-    this.descending = function () {
+    this.descending = function() {
         for (let i = 0; i < aliveRows; i++) {
             for (let j = aliveColsLeft; j < aliveCols; j++) {
-                // invadersMatrix[i][j].html.style.transform = 'translateY(' + invadersMatrix[i][j].yP + 'px)';
                 invadersMatrix[i][j].html.style.top = parseInt(invadersMatrix[i][j].html.style.top) + invadersMatrix[i][j].height + 'px';
-                // invadersMatrix[i][j].yP += invadersMatrix[i][j].height;
             }
         }
     }
 
-    this.checkIfCloseToRightBorder = function () {
+    this.checkIfCloseToRightBorder = function() {
         let alienWidth = this.biggest(aliveCols - 1);
         console.log(alienWidth);
         for (let i = 0; i < aliveRows; i++) {
@@ -149,7 +146,7 @@ function GameBoard() {
         return false;
     }
 
-    this.checkIfCloseToLeftBorder = function () {
+    this.checkIfCloseToLeftBorder = function() {
         let alienWidth = this.biggest(0);
         for (let i = 0; i < aliveRows; i++) {
             if (parseInt(invadersMatrix[i][aliveColsLeft].html.style.left) + invadersMatrix[i][aliveColsLeft].xP - 10 < 0) {
@@ -159,7 +156,7 @@ function GameBoard() {
         return false;
     }
 
-    this.moveAliens = function (direction, goDown, limit) {
+    this.moveAliens = function(direction, goDown, limit) {
         if (goDown === true) {
             this.descending();
             goDown = false;
@@ -214,19 +211,17 @@ function GameBoard() {
         return [direction, goDown, limit];
     }
 
-    this.damageOnShield = function (k) {
+    this.damageOnShield = function(k) {
         for (let i = 0; i < shields.length; i++) {
             for (let j = 0; j < shields[i].blocks.length; j++) {
                 for (let t = 0; t < shields[i].blocks[j].length; t++) {
                     if (shields[i].blocks[j][t].display === true) {
                         let up = parseInt(shields[i].blocks[j][t].html.style.top);
-                        // console.log(parseInt(shields[i].blocks[j][t].html.style.top),parseInt(shields[i].html.style.top));
                         let down = up + shields[i].blocks[j][t].height;
                         let lft = parseInt(shields[i].blocks[j][t].html.style.left);
                         let rght = lft + shields[i].blocks[j][t].width;
                         let bulletLft = parseInt(bullets[k].html.style.left);
                         let bulletBtm = parseInt(bullets[k].html.style.top);
-                        // console.log(up,down,lft,rght,bulletLft,bulletBtm);
                         if (bulletLft >= lft && bulletLft < rght && bulletBtm >= up && bulletBtm < down && bullets[k].direction !== 0 && shields[i].blocks[j][t].display === true) {
                             if (shields[i].blocks[j][t].hitCount + 1 < shields[i].blocks[j][t].hitLimit) {
                                 if (shields[i].blocks[j][t].hitCount === 0) {
@@ -250,7 +245,7 @@ function GameBoard() {
         return false;
     }
 
-    this.damageOnPlayer = function (k) {
+    this.damageOnPlayer = function(k) {
         console.log(bullets[k]);
         if (bullets[k].fired === true) {
             console.log('a');
@@ -258,7 +253,7 @@ function GameBoard() {
         }
     }
 
-    this.damageOnInvaders = function (k) {
+    this.damageOnInvaders = function(k) {
         let bulletLft = parseInt(bullets[k].html.style.left);
         let bulletTop = parseInt(bullets[k].html.style.top);
         for (let i = 0; i < aliveRows; i++) {
@@ -269,8 +264,6 @@ function GameBoard() {
                     let top = parseInt(invadersMatrix[i][j].html.style.top);
                     let btm = parseInt(invadersMatrix[i][j].html.style.top) + invadersMatrix[i][j].height;
                     if (lft <= bulletLft && rght >= bulletLft && top <= bulletTop && bulletTop <= btm) {
-                        // invadersMatrix[i][j].html.classList.remove(invadersMatrix[i][j].className);
-                        // invadersMatrix[i][j].html.classList.add('explosion');
                         invadersMatrix[i][j].html.classList.remove(invadersMatrix[i][j].className + invadersMatrix[i][j].state);
                         invadersMatrix[i][j].html.classList.add('explosion');
                         sound.play();
@@ -284,7 +277,7 @@ function GameBoard() {
         }
     }
 
-    this.manageBullets = function () {
+    this.manageBullets = function() {
         let indexesForBulletsOut = [];
         for (let i = 0; i < bullets.length; i++) {
             bullets[i].html.style.top = parseInt(bullets[i].html.style.top) + bullets[i].speed * bullets[i].direction + 'px';
@@ -308,12 +301,10 @@ function GameBoard() {
                 bullets[i].fired = false;
             }
             if (this.damageOnPlayer(i) === true) {
-                // board.removeChild(bullets[i].html);
                 bullets[i].fired = false;
                 playerShip.deadTransition();
             }
             if (parseInt(bullets[i].html.style.top) + 10 * bullets[i].direction < 0 || parseInt(bullets[i].html.style.top) + 10 * bullets[i].direction > boardHeight - 30) {
-                // board.removeChild(bullets[i].html);
                 board.removeChild(bullets[i].html);
                 bullets[i].fired = false;
                 indexesForBulletsOut.push(i);
@@ -326,7 +317,7 @@ function GameBoard() {
         }
     }
 
-    this.destroy = function () {
+    this.destroy = function() {
         playerShip.removeShip();
         for (let i = 0; i < invadersMatrix.length; i++) {
             for (let j = 0; j < invadersMatrix[i].length; j++) {
@@ -344,16 +335,16 @@ function GameBoard() {
                 board.removeChild(bullets[i].html);
             }
         }
-        for(let i=0;i<numberOfShields;i++){
-            for(let j=0;j<shieldsRows;j++){
-                for(let k=0;k<shieldCols;k++){
-                    if(shields[i].blocks[j][k].html !== undefined){
+        for (let i = 0; i < numberOfShields; i++) {
+            for (let j = 0; j < shieldsRows; j++) {
+                for (let k = 0; k < shieldCols; k++) {
+                    if (shields[i].blocks[j][k].html !== undefined) {
                         shields[i].blocks[j][k].html.display = 'none';
                         shields[i].html.removeChild(shields[i].blocks[j][k].html);
                     }
                 }
             }
-            if(shields[i].html !== undefined){
+            if (shields[i].html !== undefined) {
                 shields[i].html.display = 'none';
                 board.removeChild(shields[i].html);
             }
@@ -361,7 +352,7 @@ function GameBoard() {
         bullets = [];
     }
 
-    this.environmentChanges = function () {
+    this.environmentChanges = function() {
         let direction = 1;
         let goDown = false;
         let oldDirection = 0;
@@ -388,27 +379,23 @@ function GameBoard() {
                 intervalContor = 0;
                 [direction, goDown, moveAt] = this.moveAliens(direction, goDown, moveAt);
             }
-            // this.damageOnObject();
         }, 10);
     }
 
-    this.gameCycle = function () {
+    this.gameCycle = function() {
         this.moveAliens();
         this.environmentChanges();
     }
 
-    this.displayShields = function () {
+    this.displayShields = function() {
         for (let i = 0; i < shields.length; i++) {
             board.appendChild(shields[i].html);
         }
     }
 
-    this.setupShip = function () {
+    this.setupShip = function() {
         playerShip = new PlayerShip(board, -400, 316);
         playerShip.createShip();
         playerShip.displayShip();
     }
-
-    // console.log(document.getElementsByClassName('board')[0].offsetWidth);
-    // console.log(document.getElementsByClassName('board')[0].offsetHeight);
 }

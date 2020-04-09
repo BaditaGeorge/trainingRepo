@@ -1,0 +1,4 @@
+#1 
+In clasa SVGShape avem o functie resize care este folosita pentru redesenarea patratelor mari in momentul in care se ajusteaza prin tragerea
+punctelor negre de pe colturi, marimea patratelor.
+#2
