@@ -3,4 +3,16 @@
  as vrea sa fac ceva asemanator, usor de utilizat
  - trebuie sa am cumva in vedere gestionarea resurselor
  - imi trebuie o bibleoteca cu functii matematice, care va fi folosita in mai multe puncte ale aplicatiei
+ - render engine-ul este partea aplicatiei care se ocupa de conversia modelelor aplicatiei in imagini, a bunch of pixels that
+ can be displayed by a screen(keep this in mind)
+ - un layer este un strat in traducere libera, termenul face referire de fapt la o anumita zona din imagine
+ intr-unul din exemple, se spune despre cum obiectul din prim plan este pe un layer, iar norii si alte elemente de decor sunt pe un alt layer
+ layerele sunt pentru a grupa elemente cu trasaturi similare de comportament(viteza, cat de des ar trebui updatata imaginea respectiva 
+ in functie de cat de des se misca elementele, cat de des li se shimba starea/pozitia pentru a se remarca vizual schimbarea)
+ - eu voi lucra cu svg-uri, asadar voi utiliza svg-urile pentru a defini un layer de exemplu
+ in acest caz, in care creez toata animatia si celelalte cu ajutorul svg-urilor, am in vedere faptul ca pot desena mai multe elemente
+ pe un singur svg
+ - in jocuri, vrem intre 30-60 de frame-uri/secunda pentru a avea o experienta buna, asadar o iteratie a game loop-ului trebuie
+ sa dureze intre 33-60 de milisecunde
+ - gravitatia e greu de 'falsificat', daca avem gravitatie in joc, trebuie simulata pe bune prin fizica aplicata
  
