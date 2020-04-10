@@ -1,0 +1,6 @@
+ - Ar fi o idee sa fac si propriul engine de fizica mai simplu, special pentru game engine-ul meu.
+ - GUI-ul game engine-ului trebuie sa fie usor de folosit si inuitiv, GUI-ul din demo-ul Matter.js mi se pare foarte reusit,
+ as vrea sa fac ceva asemanator, usor de utilizat
+ - trebuie sa am cumva in vedere gestionarea resurselor
+ - imi trebuie o bibleoteca cu functii matematice, care va fi folosita in mai multe puncte ale aplicatiei
+ 
