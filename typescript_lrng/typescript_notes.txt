@@ -1,0 +1,41 @@
+- este javascript, dar cu tipuri
+- e greu in javascript, in aplicatiile la scara mare, sa te asiguri ca
+nu s-a produs o confuzie intre tipuri, undeva in cadrul aplicatiei
+- typescript-ul poate ajuta mult in migrarea din server-side spre client-side
+- TypeScript e una din alternativele existente pentru a face codul javascript
+mai usor de mentinut, utilizarea sabloanelor de programare si a altor framework-uri este
+de asemenea o solutie
+
+- TypeScript este o interfata peste JavaScript, care introduce tipuri,
+in urma rularii este plain JavaScript
+______TypeScript Features_____
+*Poate lucra in orice browser
+*Poate lucra pe orice tip de host(spune host in sensul de limbaj folosit
+pentru server-side)
+*Orice Sistem de operare
+*Este open-source, asadar transpare ridicata
+*Suport bun pentru uneltele de limbaj si limbaj in sine
+*TS suporta codul de JavaScript, poti scrie JS in TS, poti scrie hibrid,
+combinand JS cu TS, ofera flexibilitate in privinta asta
+*Poti crea interfete pentru tipurile de date, pentru a specifica diverse
+trasaturi ale unui tip de data
+*Intellisense si Syntax Checking
+
+_____About TypeScript Compiler_____
+
+- Se scrie codul TypeScript
+- Se trimite la compilatorul tsc pentru typeScript
+- Compilatorul genereaza plain JavaScript code, plecand de la codul de
+TypeScript primit
+-keywords:class,constructor,exports,extends,implements,imports,interface,
+module/namespace,public/private,<typeName>,=>
+
+
+____Code Hierarchy_____
+- TypeScript-ul are o ierarhie bine definita
+- Ierarhia pe nivele:
+---ModuleNamespace
+-----Class -> Interface
+-------Fields
+
+- Ofera un suport foarte bun pentru unelte si framework-uri
